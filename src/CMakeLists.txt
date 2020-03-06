@@ -4,6 +4,10 @@ add_executable(SpaceshipGame
 	game.cc
 )
 
+target_include_directories(SpaceshipGame
+	PRIVATE ${Stb_INCLUDE_DIR}
+)
+
 target_link_libraries(SpaceshipGame
 	PRIVATE
 	OpenGL::GL
