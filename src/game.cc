@@ -15,8 +15,8 @@
 #include "stb_image.h"
 
 const int VERTEX_LOCATION = 0;
-const int COLOR_LOCATION = 1;
-const int TEXTURE_LOCATION = 2;
+const int TEXTURE_LOCATION = 1;
+const int COLOR_LOCATION = 2;
 
 Game::Game()
 {
@@ -37,7 +37,7 @@ Game::Game()
   SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
   SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
   SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
+  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 8);
 
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
@@ -52,10 +52,28 @@ Game::Game()
 
 Game::~Game()
 {
-  SDL_DestroyWindow(m_window);
   SDL_Quit();
 }
 
+void Game::setupMatrix()
+{
+  glm::mat4 model{ glm::mat4(1.0f) };
+  model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+  glm::mat4 view{ glm::mat4(1.0f) };
+  view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+  glm::mat4 projection{ glm::perspective(glm::radians(45.0f), 1024.0f/768.0f, 0.1f, 100.0f) };
+
+  int modelLoc{ glGetUniformLocation(m_shaderProgram, "model") };
+  glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+  modelLoc = glGetUniformLocation(m_shaderProgram, "view");
+  glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+  modelLoc = glGetUniformLocation(m_shaderProgram, "projection");
+  glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(projection));
+}
 void Game::gameLoop()
 {
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -81,7 +99,8 @@ void Game::gameLoop()
         break;
     }
 
-    glClear(GL_COLOR_BUFFER_BIT);
+    glDepthMask(true);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     const auto now = clock_t::now();
     const duration delta = now - start;
@@ -93,13 +112,15 @@ void Game::gameLoop()
     glBindTexture(GL_TEXTURE_2D, m_texture[0]); 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, m_texture[1]);
-    
+
+    setupMatrix();
+
     glBindVertexArray(m_vao);
 
     move(glm::radians(time += (delta.count() / 10.0f)));
 
-    //glDrawArrays(GL_TRIANGLES, 0, 3);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    drawCubes();
 
     SDL_GL_SwapWindow(m_window);
   }
@@ -168,49 +189,63 @@ void Game::loadShaders()
 void Game::loadTriangle()
 {
   std::vector<float> vertices = {
-     0.5f,  0.5f, 0.0f,
-     1.0f,  0.0f, 0.0f,
-     1.0f,  1.0f,
-     
-     0.5f, -0.5f, 0.0f,
-     0.0f,  1.0f, 0.0f,
-     1.0f,  0.0f,
-     
-     -0.5f, -0.5f, 0.0f,
-     0.0f,  0.0f, 1.0f,
-     0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+    0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+    0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 
-     -0.5f,  0.5f, 0.0f,
-     1.0f,  1.0f, 0.0f,
-     0.0f,  1.0f
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+    0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+    0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+    0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+    0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+    0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+    0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
   };
 
-  std::vector<int> indices = {
-    0, 1, 3,
-    1, 2, 3
-  };
-
-  unsigned int vbo{}, ebo{};
+  unsigned int vbo{};
 
   glGenVertexArrays(1, &m_vao);
   glGenBuffers(1, &vbo);
-  glGenBuffers(1, &ebo);
 
   glBindVertexArray(m_vao);
 
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(float) * indices.size(), indices.data(), GL_STATIC_DRAW);
-
-  glVertexAttribPointer(VERTEX_LOCATION, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+  glVertexAttribPointer(VERTEX_LOCATION, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(VERTEX_LOCATION);
 
-  glVertexAttribPointer(COLOR_LOCATION, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(12));
-  glEnableVertexAttribArray(COLOR_LOCATION);
-
-  glVertexAttribPointer(TEXTURE_LOCATION, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(24));
+  glVertexAttribPointer(TEXTURE_LOCATION, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(12));
   glEnableVertexAttribArray(TEXTURE_LOCATION);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -244,11 +279,38 @@ void Game::loadTexture(const std::string a_path, int a_idx)
   stbi_image_free(data);
 }
 
+void Game::drawCubes()
+{
+  std::vector<glm::vec3> cubes = {
+    glm::vec3( 0.0f,  0.0f,  0.0f), 
+    glm::vec3( 2.0f,  5.0f, -15.0f), 
+    glm::vec3(-1.5f, -2.2f, -2.5f),  
+    glm::vec3(-3.8f, -2.0f, -12.3f),  
+    glm::vec3( 2.4f, -0.4f, -3.5f),  
+    glm::vec3(-1.7f,  3.0f, -7.5f),  
+    glm::vec3( 1.3f, -2.0f, -2.5f),  
+    glm::vec3( 1.5f,  2.0f, -2.5f), 
+    glm::vec3( 1.5f,  0.2f, -1.5f), 
+    glm::vec3(-1.3f,  1.0f, -1.5f)
+  };
+
+
+  for (size_t i = 0; i < cubes.size(); ++i) {
+    glm::mat4 model{ glm::mat4(1.0f) };
+    model = glm::translate(model, cubes[i]);
+    float angle{ 20.0f * i };
+    model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.05f));
+    int modelLoc{ glGetUniformLocation(m_shaderProgram, "model") };
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+  }
+}
+
 void Game::move(float a_angle)
 {
   glm::mat4 trans{ glm::mat4(1.0f) };
-  trans = glm::translate(trans, glm::vec3(-0.5f, 0.0f, 0.f));
-  trans = glm::rotate(trans, a_angle, glm::vec3(0.0f, 1.0f, 1.0f));
+  trans = glm::translate(trans, glm::vec3(-0.5f, 0.0f, 0.5f));
+  trans = glm::rotate(trans, a_angle, glm::vec3(1.0f, 0.0f, 1.0f));
   unsigned int transformLoc= glGetUniformLocation(m_shaderProgram, "transform");
   glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 }

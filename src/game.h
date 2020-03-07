@@ -11,11 +11,13 @@ class Game {
   Game();
   ~Game();
 
+  void setupMatrix();
   void gameLoop();
   std::optional<std::string> openFile(std::string a_path);
   void loadShaders();
   void loadTriangle();
   void loadTexture(const std::string a_path, int a_idx);
+  void drawCubes();
 
   void move(float a_angle);
 
