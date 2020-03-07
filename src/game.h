@@ -17,6 +17,8 @@ class Game {
   void loadTriangle();
   void loadTexture(const std::string a_path, int a_idx);
 
+  void move(float a_angle);
+
  private:
   SDL_Window *m_window{};
   SDL_GLContext m_context{};
