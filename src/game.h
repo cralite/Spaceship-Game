@@ -3,20 +3,22 @@
 
 #include <SDL.h>
 #include <glad/glad.h>
-#include <optional>
 #include <string>
+#include <entt/entt.hpp>
+
+#include "utils.h"
 
 class Game {
  public:
   Game();
-  ~Game();
+  ~Game() = default;
 
   void setupMatrix();
+  void handleWindowEvent(SDL_Event a_event);
+
   void gameLoop();
-  std::optional<std::string> openFile(std::string a_path);
-  void loadShaders();
+ 
   void loadTriangle();
-  void loadTexture(const std::string a_path, int a_idx);
   void drawCubes();
 
   void move(float a_angle);
@@ -24,9 +26,8 @@ class Game {
  private:
   SDL_Window *m_window{};
   SDL_GLContext m_context{};
-  unsigned int m_shaderProgram{};
-  unsigned int m_vao{};
-  unsigned int m_texture[2]{};
+  Shader m_shader{};
+  entt::registry m_registry{};
 };
 
 #endif // GAME_H

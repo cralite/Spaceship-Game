@@ -2,6 +2,9 @@ add_executable(SpaceshipGame
 	main.cc
 	game.h
 	game.cc
+	data_types.h
+	utils.h
+	utils.cc
 )
 
 target_include_directories(SpaceshipGame
