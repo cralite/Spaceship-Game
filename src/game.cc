@@ -93,6 +93,7 @@ Game::Game()
   m_shader.m_program = glCreateProgram();
   Utils::load_shader("D:/Develop/SpaceshipGame/data/shaders/vertexShader.vert", ShaderType::eVertex, m_shader);
   Utils::load_shader("D:/Develop/SpaceshipGame/data/shaders/fragmentShader.frag", ShaderType::eFragment, m_shader);
+  setupCamera();
 
   glEnable(GL_DEBUG_OUTPUT);
   glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); 
@@ -101,24 +102,24 @@ Game::Game()
 }
 
 
-void Game::setupMatrix()
+void Game::setupMatrix(glm::mat4 a_view)
 {
-  glm::mat4 model{ glm::mat4(1.0f) };
-  model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
-  glm::mat4 view{ glm::mat4(1.0f) };
-  view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-
   glm::mat4 projection{ glm::perspective(glm::radians(45.0f), 1024.0f/768.0f, 0.1f, 100.0f) };
 
-  int modelLoc{ glGetUniformLocation(m_shader.m_program, "model") };
-  glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-  modelLoc = glGetUniformLocation(m_shader.m_program, "view");
-  glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(view));
+  uint32_t modelLoc = glGetUniformLocation(m_shader.m_program, "view");
+  glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(a_view));
 
   modelLoc = glGetUniformLocation(m_shader.m_program, "projection");
   glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(projection));
+}
+
+void Game::setupCamera()
+{
+  m_camera.m_pos = glm::vec3(0.0f, 0.0f, 3.0f);
+  m_camera.m_direction = glm::vec3(0.0f, 0.0f, -1.0f);
+  m_camera.m_right = glm::normalize(glm::cross(m_camera.m_up, m_camera.m_direction));
+  //m_camera.m_up = glm::cross(m_camera.m_direction, m_camera.m_right);
+  m_camera.m_up = glm::vec3(0.0f, 1.0f, 0.0f);
 }
 
 void Game::handleWindowEvent(SDL_Event a_event)
@@ -126,6 +127,28 @@ void Game::handleWindowEvent(SDL_Event a_event)
   //switch (a_event) {
 
   //};
+}
+
+void Game::handleKeybordEvent(SDL_KeyboardEvent a_key)
+{
+  switch (a_key.keysym.sym) {
+    case SDLK_UP: {
+      m_camera.m_pos += m_camera.m_speed * m_camera.m_direction;
+      break;
+    }
+    case SDLK_DOWN: {
+      m_camera.m_pos -= m_camera.m_speed * m_camera.m_direction;
+      break;
+    }
+    case SDLK_LEFT: {
+      m_camera.m_pos -= glm::normalize(glm::cross(m_camera.m_direction, m_camera.m_up)) * m_camera.m_speed;
+      break;
+    }
+    case SDLK_RIGHT: {
+      m_camera.m_pos += glm::normalize(glm::cross(m_camera.m_direction, m_camera.m_up)) * m_camera.m_speed;
+      break;
+    }
+  }
 }
 
 void Game::gameLoop()
@@ -155,6 +178,9 @@ void Game::gameLoop()
           break;
         //case SDL_WINDOWEVENT:
           //handleWindowEvent()
+        case SDL_KEYDOWN:
+          handleKeybordEvent(event.key);
+          break;
       };
       if (event.type == SDL_QUIT)
         break;
@@ -164,8 +190,10 @@ void Game::gameLoop()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     const auto now = clock_t::now();
-    const duration delta = now - start;
+    const duration deltaDuration = now - start;
     start = now;
+    double delta{ deltaDuration.count() };
+    time += delta;
 
     glUseProgram(m_shader.m_program);
 
@@ -174,14 +202,15 @@ void Game::gameLoop()
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, texture2.m_texture);
 
-    setupMatrix();
+    glm::mat4 view{ glm::lookAt(m_camera.m_pos, m_camera.m_pos + m_camera.m_direction, m_camera.m_up) };
+    setupMatrix(view);
 
     glBindVertexArray(model.m_vao);
 
-    move(glm::radians(time += (delta.count() / 10.0f)));
-
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-    drawCubes();
+    //player
+    //model dla playera
+    //glDrawArrays(GL_TRIANGLES, 0, 36);
+    drawCubes(glm::radians(time));
 
     SDL_GL_SwapWindow(m_window);
   }
@@ -236,7 +265,7 @@ void Game::loadTriangle()
   model = Utils::load_model(vertices);
 }
 
-void Game::drawCubes()
+void Game::drawCubes(float a_angle)
 {
   std::vector<glm::vec3> cubes = {
     glm::vec3( 0.0f,  0.0f,  0.0f), 
@@ -255,8 +284,8 @@ void Game::drawCubes()
   for (size_t i = 0; i < cubes.size(); ++i) {
     glm::mat4 cube{ glm::mat4(1.0f) };
     cube = glm::translate(cube, cubes[i]);
-    float angle{ 20.0f * i };
-    cube = glm::rotate(cube, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.05f));
+    float angle{ 20.0f * i + a_angle };
+    cube = glm::rotate(cube, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
     int modelLoc{ glGetUniformLocation(m_shader.m_program, "model") };
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(cube));
     glDrawArrays(GL_TRIANGLES, 0, 36);
