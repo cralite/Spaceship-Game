@@ -2,6 +2,8 @@
 #define DATA_TYPES_H
 
 #include <cstdint>
+
+#include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
 
 enum class ShaderType {
@@ -10,24 +12,44 @@ enum class ShaderType {
 };
 
 struct Model {
-  uint32_t m_vao{};
+  uint32_t vao{};
 };
 
 struct Shader {
-  uint32_t m_program{};
+  uint32_t program{};
 };
 
 struct Texture {
-  uint32_t m_texture{};
+  uint32_t texture{};
 };
 
 struct Camera {
-  glm::vec3 m_pos{};
-  glm::vec3 m_up{};
-  glm::vec3 m_direction{};
-  glm::vec3 m_right{};
-  glm::vec3 m_view{};
-  float m_speed{ 0.05f };
+  glm::vec3 pos{};
+  glm::vec3 up{};
+  glm::vec3 direction{};
+  glm::vec3 right{};
+  glm::vec3 view{};
+  float speed{ 0.05f };
 };
+
+struct Physics {
+  glm::mat4 modelMatrix{};
+  glm::vec3 position{};
+  glm::vec3 velocity{};
+  glm::vec3 rotationAxis{};
+  float rotationAngle{};
+  bool player{};
+};
+
+enum class Key {
+  eLeft,
+  eRight,
+  eUp,
+  eDown,
+  eSpace,
+  eCount,
+};
+
+
 
 #endif //DATA_TYPES_H

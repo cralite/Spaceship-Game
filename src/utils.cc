@@ -49,8 +49,8 @@ Texture Utils::load_texture(std::string_view a_path)
   }
 
   Texture texture{};
-  glGenTextures(1, &texture.m_texture);
-  glBindTexture(GL_TEXTURE_2D, texture.m_texture);
+  glGenTextures(1, &texture.texture);
+  glBindTexture(GL_TEXTURE_2D, texture.texture);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -96,10 +96,10 @@ void Utils::load_shader(std::string_view a_path, ShaderType a_type, Shader& a_sh
 
     assert(status);
 
-    glAttachShader(a_shader.m_program, newShader);
+    glAttachShader(a_shader.program, newShader);
   }
 
-  glLinkProgram(a_shader.m_program);
+  glLinkProgram(a_shader.program);
   glDeleteShader(newShader);
 }
 
@@ -108,10 +108,10 @@ Model Utils::load_model(const std::vector<float>& a_data)
   uint32_t vbo{};
 
   Model model{};
-  glGenVertexArrays(1, &model.m_vao);
+  glGenVertexArrays(1, &model.vao);
   glGenBuffers(1, &vbo);
 
-  glBindVertexArray(model.m_vao);
+  glBindVertexArray(model.vao);
 
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(float) * a_data.size(), a_data.data(), GL_STATIC_DRAW);

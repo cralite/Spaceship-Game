@@ -15,6 +15,50 @@
 Model model{};
 Texture texture{};  
 
+std::vector<float> vertices = {
+  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+  0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+  0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+  0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+  0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+  0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+  0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+  -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+  -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+  -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+  -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+  0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+  0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+  0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+  0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+  0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+  0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+  0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+  0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+  0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+  0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+  0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+  0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+  -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+};
+
 //void APIENTRY myGlDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 void APIENTRY myGlDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
@@ -90,7 +134,7 @@ Game::Game()
   gladLoadGLLoader(SDL_GL_GetProcAddress);
 
   glViewport(0, 0, 1024, 768);
-  m_shader.m_program = glCreateProgram();
+  m_shader.program = glCreateProgram();
   Utils::load_shader("D:/Develop/SpaceshipGame/data/shaders/vertexShader.vert", ShaderType::eVertex, m_shader);
   Utils::load_shader("D:/Develop/SpaceshipGame/data/shaders/fragmentShader.frag", ShaderType::eFragment, m_shader);
   setupCamera();
@@ -102,24 +146,54 @@ Game::Game()
 }
 
 
-void Game::setupMatrix(glm::mat4 a_view)
-{
-  glm::mat4 projection{ glm::perspective(glm::radians(45.0f), 1024.0f/768.0f, 0.1f, 100.0f) };
-
-  uint32_t modelLoc = glGetUniformLocation(m_shader.m_program, "view");
-  glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(a_view));
-
-  modelLoc = glGetUniformLocation(m_shader.m_program, "projection");
-  glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(projection));
-}
-
 void Game::setupCamera()
 {
-  m_camera.m_pos = glm::vec3(0.0f, 0.0f, 3.0f);
-  m_camera.m_direction = glm::vec3(0.0f, 0.0f, -1.0f);
-  m_camera.m_right = glm::normalize(glm::cross(m_camera.m_up, m_camera.m_direction));
-  //m_camera.m_up = glm::cross(m_camera.m_direction, m_camera.m_right);
-  m_camera.m_up = glm::vec3(0.0f, 1.0f, 0.0f);
+  m_camera.pos = glm::vec3(0.0f, 0.0f, 3.0f);
+  m_camera.direction = glm::vec3(0.0f, 0.0f, -1.0f);
+  m_camera.right = glm::normalize(glm::cross(m_camera.up, m_camera.direction));
+  m_camera.up = glm::vec3(0.0f, 1.0f, 0.0f);
+}
+
+void Game::setupEntities()
+{
+  Model playerModel{ Utils::load_model(vertices) };
+  Texture playerTexture{ Utils::load_texture("D:/Develop/SpaceshipGame/data/wall.jpg") };
+
+  auto spawnEntity = [&](Model &a_model, Texture &a_texture) {
+    auto entity = m_registry.create();
+    m_registry.assign<Model>(entity, a_model);
+    m_registry.assign<Texture>(entity, a_texture);
+    m_registry.assign<Physics>(entity, Physics{});
+    return entity;
+  };
+
+  m_player = spawnEntity(playerModel, playerTexture);
+  auto &playerPhysics = m_registry.get<Physics>(m_player);
+  playerPhysics.player = true;
+
+  std::vector<glm::vec3> cubes = {
+    glm::vec3( 2.0f,  5.0f, -15.0f), 
+    glm::vec3(-1.5f, -2.2f, -2.5f),  
+    glm::vec3(-3.8f, -2.0f, -12.3f),  
+    glm::vec3( 2.4f, -0.4f, -3.5f),  
+    glm::vec3(-1.7f,  3.0f, -7.5f),  
+    glm::vec3( 1.3f, -2.0f, -2.5f),  
+    glm::vec3( 1.5f,  2.0f, -2.5f), 
+    glm::vec3( 1.5f,  0.2f, -1.5f), 
+    glm::vec3(-1.3f,  1.0f, -1.5f),
+    glm::vec3( 6.0f,  1.0f,  3.0f)
+  };
+
+  for (size_t i = 0; i < cubes.size(); ++i) {
+    Model model{ Utils::load_model(vertices) };
+    Texture texture{ Utils::load_texture("D:/Develop/SpaceshipGame/data/awesomeface.png") };
+
+    auto asteroid = spawnEntity(model, texture);
+
+    auto &physics = m_registry.get<Physics>(asteroid);
+    physics.position = cubes[i];
+    physics.rotationAxis = glm::vec3(1.0f, 0.3f, 0.5f);
+  }
 }
 
 void Game::handleWindowEvent(SDL_Event a_event)
@@ -129,26 +203,16 @@ void Game::handleWindowEvent(SDL_Event a_event)
   //};
 }
 
-void Game::handleKeybordEvent(SDL_KeyboardEvent a_key)
+void Game::handleKeybordEvent(SDL_KeyboardEvent a_key, bool a_pressed)
 {
-  switch (a_key.keysym.sym) {
-    case SDLK_UP: {
-      m_camera.m_pos += m_camera.m_speed * m_camera.m_direction;
-      break;
-    }
-    case SDLK_DOWN: {
-      m_camera.m_pos -= m_camera.m_speed * m_camera.m_direction;
-      break;
-    }
-    case SDLK_LEFT: {
-      m_camera.m_pos -= glm::normalize(glm::cross(m_camera.m_direction, m_camera.m_up)) * m_camera.m_speed;
-      break;
-    }
-    case SDLK_RIGHT: {
-      m_camera.m_pos += glm::normalize(glm::cross(m_camera.m_direction, m_camera.m_up)) * m_camera.m_speed;
-      break;
-    }
-  }
+  if (a_key.keysym.sym == SDLK_UP)
+    m_keys[static_cast<size_t>(Key::eUp)] = a_pressed;
+  else if (a_key.keysym.sym == SDLK_DOWN)
+    m_keys[static_cast<size_t>(Key::eDown)] = a_pressed;
+  else if (a_key.keysym.sym == SDLK_LEFT)
+    m_keys[static_cast<size_t>(Key::eLeft)] = a_pressed;
+  else if (a_key.keysym.sym == SDLK_RIGHT)
+    m_keys[static_cast<size_t>(Key::eRight)] = a_pressed;
 }
 
 void Game::gameLoop()
@@ -156,37 +220,42 @@ void Game::gameLoop()
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   glEnable(GL_DEPTH_TEST);
 
-  loadTriangle();
-  Texture texture1 = Utils::load_texture("D:/Develop/SpaceshipGame/data/wall.jpg");
-  Texture texture2 = Utils::load_texture("D:/Develop/SpaceshipGame/data/awesomeface.png");
+  setupEntities();
 
   using clock_t = std::chrono::high_resolution_clock;
   auto start = clock_t::now();
   using duration = std::chrono::duration<double, std::milli>;
   double time{};
 
-  glUseProgram(m_shader.m_program);
-  glUniform1i(glGetUniformLocation(m_shader.m_program, "texture1"), 0);
-  glUniform1i(glGetUniformLocation(m_shader.m_program, "texture2"), 1);
+  glDepthMask(true);
+  glUseProgram(m_shader.program);
 
-  while (true) {
+  uint32_t const modelLocation = glGetUniformLocation(m_shader.program, "view");
+  uint32_t const projectionLocation = glGetUniformLocation(m_shader.program, "projection");
+
+  bool quit{};
+
+  glm::mat4 projection{ glm::perspective(glm::radians(45.0f), 1024.0f/768.0f, 0.1f, 100.0f) };
+
+  while (!quit) {
     SDL_Event event{};
 
     if (SDL_PollEvent(&event)) {
       switch (event.type) {
         case SDL_QUIT:
+          quit = true;
           break;
         //case SDL_WINDOWEVENT:
           //handleWindowEvent()
+        case SDL_KEYUP:
+          handleKeybordEvent(event.key, false);
+          break;
         case SDL_KEYDOWN:
-          handleKeybordEvent(event.key);
+          handleKeybordEvent(event.key, true);
           break;
       };
-      if (event.type == SDL_QUIT)
-        break;
     }
 
-    glDepthMask(true);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     const auto now = clock_t::now();
@@ -195,108 +264,87 @@ void Game::gameLoop()
     double delta{ deltaDuration.count() };
     time += delta;
 
-    glUseProgram(m_shader.m_program);
+    updateInput();
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture1.m_texture); 
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texture2.m_texture);
+    updatePlayer(delta);
+    updateEntities(delta);
 
-    glm::mat4 view{ glm::lookAt(m_camera.m_pos, m_camera.m_pos + m_camera.m_direction, m_camera.m_up) };
-    setupMatrix(view);
+    glm::mat4 view{ glm::lookAt(m_camera.pos, m_camera.pos + m_camera.direction, m_camera.up) };
 
-    glBindVertexArray(model.m_vao);
+    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
 
-    //player
-    //model dla playera
-    //glDrawArrays(GL_TRIANGLES, 0, 36);
-    drawCubes(glm::radians(time));
+    drawEntities();
 
     SDL_GL_SwapWindow(m_window);
   }
 }
 
-void Game::loadTriangle()
+void Game::updateInput()
 {
-  std::vector<float> vertices = {
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-    0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-    0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+  if (m_keys[static_cast<size_t>(Key::eUp)])
+    m_camera.pos += m_camera.speed * m_camera.direction;
 
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-    0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-    0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+  if (m_keys[static_cast<size_t>(Key::eDown)])
+    m_camera.pos -= m_camera.speed * m_camera.direction;
 
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+  if (m_keys[static_cast<size_t>(Key::eLeft)])
+    m_camera.pos -= glm::normalize(glm::cross(m_camera.direction, m_camera.up)) * m_camera.speed;
 
-    0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-    0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-    0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-    0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-  };
-
-  model = Utils::load_model(vertices);
+  if (m_keys[static_cast<size_t>(Key::eRight)])
+    m_camera.pos += glm::normalize(glm::cross(m_camera.direction, m_camera.up)) * m_camera.speed;
 }
 
-void Game::drawCubes(float a_angle)
+void Game::updatePlayer(float a_delta)
 {
-  std::vector<glm::vec3> cubes = {
-    glm::vec3( 0.0f,  0.0f,  0.0f), 
-    glm::vec3( 2.0f,  5.0f, -15.0f), 
-    glm::vec3(-1.5f, -2.2f, -2.5f),  
-    glm::vec3(-3.8f, -2.0f, -12.3f),  
-    glm::vec3( 2.4f, -0.4f, -3.5f),  
-    glm::vec3(-1.7f,  3.0f, -7.5f),  
-    glm::vec3( 1.3f, -2.0f, -2.5f),  
-    glm::vec3( 1.5f,  2.0f, -2.5f), 
-    glm::vec3( 1.5f,  0.2f, -1.5f), 
-    glm::vec3(-1.3f,  1.0f, -1.5f)
-  };
+  auto &model = m_registry.get<Model>(m_player);
+  auto &texture = m_registry.get<Texture>(m_player);
+  auto &physics = m_registry.get<Physics>(m_player);
 
+//  physics.position = m_camera.pos + glm::vec3(0.0f, -10.0f, 15.0f);
 
-  for (size_t i = 0; i < cubes.size(); ++i) {
-    glm::mat4 cube{ glm::mat4(1.0f) };
-    cube = glm::translate(cube, cubes[i]);
-    float angle{ 20.0f * i + a_angle };
-    cube = glm::rotate(cube, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-    int modelLoc{ glGetUniformLocation(m_shader.m_program, "model") };
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(cube));
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+  physics.modelMatrix = glm::mat4(1.0f);
+  physics.modelMatrix = glm::translate(physics.modelMatrix, physics.position);
+}
+
+void Game::updateEntities(float a_delta)
+{
+  auto view = m_registry.view<Physics>();
+
+  for (auto entity : view) {
+    auto &physics = view.get<Physics>(entity);
+
+    if (physics.player)
+      continue;
+
+    physics.position += physics.velocity * a_delta;
+    physics.modelMatrix = glm::mat4(1.0f);
+    physics.modelMatrix = glm::translate(physics.modelMatrix, physics.position);
+    physics.modelMatrix = glm::rotate(physics.modelMatrix, glm::radians(physics.rotationAngle * a_delta), physics.rotationAxis);
   }
 }
 
-void Game::move(float a_angle)
+void Game::updateCamera()
 {
-  glm::mat4 trans{ glm::mat4(1.0f) };
-  trans = glm::translate(trans, glm::vec3(-0.5f, 0.0f, 0.5f));
-  trans = glm::rotate(trans, a_angle, glm::vec3(1.0f, 0.0f, 1.0f));
-  unsigned int transformLoc= glGetUniformLocation(m_shader.m_program, "transform");
-  glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+}
+
+void Game::drawEntities()
+{
+  auto view = m_registry.view<Texture, Model, Physics>();
+
+  int modelLoc{ glGetUniformLocation(m_shader.program, "model") };
+
+  for (auto entity : view) {
+    auto &model = view.get<Model>(entity);
+    auto &texture = view.get<Texture>(entity);
+    auto &physics = view.get<Physics>(entity);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture.texture);
+    glBindVertexArray(model.vao);
+
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(physics.modelMatrix));
+
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+  }
 }

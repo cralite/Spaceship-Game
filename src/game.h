@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <glad/glad.h>
 #include <string>
+#include <array>
 #include <entt/entt.hpp>
 #include <glm/matrix.hpp>
 
@@ -14,17 +15,19 @@ class Game {
   Game();
   ~Game() = default;
 
-  void setupMatrix(glm::mat4 a_view);
   void setupCamera();
+  void setupEntities();
+
   void handleWindowEvent(SDL_Event a_event);
-  void handleKeybordEvent(SDL_KeyboardEvent a_key);
+  void handleKeybordEvent(SDL_KeyboardEvent a_key, bool a_pressed);
 
   void gameLoop();
  
-  void loadTriangle();
-  void drawCubes(float a_angle);
-
-  void move(float a_angle);
+  void updateInput();
+  void updatePlayer(float a_delta);
+  void updateEntities(float a_delta);
+  void updateCamera();
+  void drawEntities();
 
  private:
   SDL_Window *m_window{};
@@ -32,6 +35,8 @@ class Game {
   Shader m_shader{};
   Camera m_camera{};
   entt::registry m_registry{};
+  entt::entity m_player{};
+  std::array<bool, static_cast<size_t>(Key::eCount)> m_keys{};
 };
 
 #endif // GAME_H
