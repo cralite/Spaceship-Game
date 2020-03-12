@@ -38,6 +38,7 @@ struct Physics {
   glm::vec3 velocity{};
   glm::vec3 rotationAxis{};
   float rotationAngle{};
+  float rotationVelocity{};
   bool player{};
 };
 

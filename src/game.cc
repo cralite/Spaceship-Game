@@ -1,5 +1,4 @@
 #include "game.h"
-#include "utils.h"
 
 #include <GL/GL.h>
 #include <glm/glm.hpp>
@@ -11,11 +10,11 @@
 #include <math.h>
 #include <chrono>
 #include <cassert>
+#include <random>
 
-Model model{};
-Texture texture{};  
+#include "utils.h"
 
-std::vector<float> vertices = {
+std::vector<float> g_vertices = {
   -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
   0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
@@ -58,6 +57,10 @@ std::vector<float> vertices = {
   -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
   -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 };
+
+std::random_device g_rd;
+std::mt19937 g_gen{ g_rd() };
+std::uniform_real_distribution<float> g_asteroidAngleVelocity(0.05f, 1.f);
 
 //void APIENTRY myGlDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 void APIENTRY myGlDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
@@ -156,7 +159,7 @@ void Game::setupCamera()
 
 void Game::setupEntities()
 {
-  Model playerModel{ Utils::load_model(vertices) };
+  Model playerModel{ Utils::load_model(g_vertices) };
   Texture playerTexture{ Utils::load_texture("D:/Develop/SpaceshipGame/data/wall.jpg") };
 
   auto spawnEntity = [&](Model &a_model, Texture &a_texture) {
@@ -185,7 +188,7 @@ void Game::setupEntities()
   };
 
   for (size_t i = 0; i < cubes.size(); ++i) {
-    Model model{ Utils::load_model(vertices) };
+    Model model{ Utils::load_model(g_vertices) };
     Texture texture{ Utils::load_texture("D:/Develop/SpaceshipGame/data/awesomeface.png") };
 
     auto asteroid = spawnEntity(model, texture);
@@ -193,6 +196,7 @@ void Game::setupEntities()
     auto &physics = m_registry.get<Physics>(asteroid);
     physics.position = cubes[i];
     physics.rotationAxis = glm::vec3(1.0f, 0.3f, 0.5f);
+    physics.rotationVelocity = g_asteroidAngleVelocity(g_gen);
   }
 }
 
@@ -318,9 +322,11 @@ void Game::updateEntities(float a_delta)
       continue;
 
     physics.position += physics.velocity * a_delta;
+    physics.rotationAngle += physics.rotationVelocity * a_delta;
+
     physics.modelMatrix = glm::mat4(1.0f);
     physics.modelMatrix = glm::translate(physics.modelMatrix, physics.position);
-    physics.modelMatrix = glm::rotate(physics.modelMatrix, glm::radians(physics.rotationAngle * a_delta), physics.rotationAxis);
+    physics.modelMatrix = glm::rotate(physics.modelMatrix, glm::radians(physics.rotationAngle), physics.rotationAxis);
   }
 }
 
