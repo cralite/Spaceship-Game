@@ -29,6 +29,9 @@ class Game {
   void updateCamera();
   void drawEntities();
 
+  void debugDrawSystem();
+  void debugDrawEntitiesTree();
+
  private:
   SDL_Window *m_window{};
   SDL_GLContext m_context{};

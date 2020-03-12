@@ -12,6 +12,10 @@
 #include <cassert>
 #include <random>
 
+#include <imgui.h>
+#include <imgui_impl_sdl.h>
+#include <imgui_impl_opengl3.h>
+
 #include "utils.h"
 
 std::vector<float> g_vertices = {
@@ -127,14 +131,22 @@ Game::Game()
   SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
   SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 8);
+  SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
-  m_window = SDL_CreateWindow("SpaceGame", 100, 100, 1024, 768, SDL_WINDOW_OPENGL);
+  m_window = SDL_CreateWindow("SpaceGame", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
   m_context = SDL_GL_CreateContext(m_window);
 
   gladLoadGLLoader(SDL_GL_GetProcAddress);
+
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGui::StyleColorsDark();
+
+  ImGui_ImplSDL2_InitForOpenGL(m_window, m_context);
+  ImGui_ImplOpenGL3_Init("#version 150");
 
   glViewport(0, 0, 1024, 768);
   m_shader.program = glCreateProgram();
@@ -221,7 +233,6 @@ void Game::handleKeybordEvent(SDL_KeyboardEvent a_key, bool a_pressed)
 
 void Game::gameLoop()
 {
-  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   glEnable(GL_DEPTH_TEST);
 
   setupEntities();
@@ -241,10 +252,14 @@ void Game::gameLoop()
 
   glm::mat4 projection{ glm::perspective(glm::radians(45.0f), 1024.0f/768.0f, 0.1f, 100.0f) };
 
+  float clearColor[3]{ 0.2f, 0.3f, 0.3f };
+
   while (!quit) {
     SDL_Event event{};
 
     if (SDL_PollEvent(&event)) {
+      ImGui_ImplSDL2_ProcessEvent(&event);
+
       switch (event.type) {
         case SDL_QUIT:
           quit = true;
@@ -259,6 +274,15 @@ void Game::gameLoop()
           break;
       };
     }
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL2_NewFrame(m_window);
+    ImGui::NewFrame();
+
+    debugDrawSystem();
+    debugDrawEntitiesTree();
+
+    glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.f);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -278,8 +302,11 @@ void Game::gameLoop()
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
 
+    ImGui::Render();
+
     drawEntities();
 
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     SDL_GL_SwapWindow(m_window);
   }
 }
@@ -323,6 +350,9 @@ void Game::updateEntities(float a_delta)
 
     physics.position += physics.velocity * a_delta;
     physics.rotationAngle += physics.rotationVelocity * a_delta;
+    
+    if (physics.rotationAngle >= 360.f)
+      physics.rotationAngle -= 360.f;
 
     physics.modelMatrix = glm::mat4(1.0f);
     physics.modelMatrix = glm::translate(physics.modelMatrix, physics.position);
@@ -353,4 +383,41 @@ void Game::drawEntities()
 
     glDrawArrays(GL_TRIANGLES, 0, 36);
   }
+}
+
+void Game::debugDrawSystem()
+{
+  ImGuiIO& io = ImGui::GetIO();
+
+  ImGui::Begin("System");
+  ImGui::Text("Frame time: %.3f ms", 1000.0f / io.Framerate);
+  ImGui::Text("FPS: %.3f ms", io.Framerate);
+  ImGui::End();
+}
+
+void Game::debugDrawEntitiesTree()
+{
+  ImGui::Begin("Entities");
+
+  auto view = m_registry.view<Physics>();
+
+  size_t const count = view.size();
+
+  for (size_t i = 0; i < count; ++i) {
+    auto entity = view[i];
+    auto& physics = view.get<Physics>(entity);
+
+    if (ImGui::TreeNode((void*)(intptr_t)i, "Entity #%02d%s", i, physics.player ? " (player)" : ""))
+    {
+      ImGui::InputFloat3("position", glm::value_ptr(physics.position));
+      ImGui::InputFloat3("velocity", glm::value_ptr(physics.velocity));
+      ImGui::InputFloat3("rotationAxis", glm::value_ptr(physics.rotationAxis));
+      ImGui::InputFloat("rotationAngle", &physics.rotationAngle);
+      ImGui::InputFloat("rotationVelocity", &physics.rotationVelocity);
+      ImGui::TreePop();
+    }
+
+  }
+
+  ImGui::End();
 }
