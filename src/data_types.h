@@ -27,9 +27,10 @@ struct Texture {
 struct Camera {
   glm::vec3 pos{};
   glm::vec3 up{};
-  glm::vec3 direction{};
-  glm::vec3 right{};
   glm::vec3 view{};
+  glm::vec3 offset{};
+  glm::vec3 lookAt{};
+  glm::vec3 direction{};
   float speed{ 1.00f };
 };
 

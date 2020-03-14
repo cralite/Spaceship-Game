@@ -22,9 +22,6 @@ std::random_device g_rd;
 std::mt19937 g_gen{ g_rd() };
 std::uniform_real_distribution<float> g_asteroidAngleVelocity(0.05f, 1.f);
 
-glm::vec3 g_cameraOffset{ 0.0f, 1.0f, 1.0f };
-glm::vec3 g_cameraLookAt{ 0.0f, -1.0f, -1.0f };
-
 //void APIENTRY myGlDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 void APIENTRY myGlDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
@@ -137,9 +134,10 @@ Game::Game()
 void Game::setupCamera()
 {
   m_camera.pos = glm::vec3(0.0f, 0.0f, 3.0f);
-  m_camera.direction = glm::vec3(0.0f, 0.0f, -1.0f);
-  m_camera.right = glm::normalize(glm::cross(m_camera.up, m_camera.direction));
   m_camera.up = glm::vec3(0.0f, 1.0f, 0.0f);
+  m_camera.lookAt = glm::vec3(0.0f, -6.0f, -6.0f);
+  m_camera.offset = glm::vec3(0.0f, 2.0f, 2.0f);
+  m_camera.direction = glm::vec3(0.0f, 0.0f, -1.0f);
 }
 
 void Game::setupEntities()
@@ -277,7 +275,7 @@ void Game::gameLoop()
 
     // camera = player + offset;
     //auto& playerPosition = m_registry.get<Physics>(m_player).position;
-    glm::mat4 view{ glm::lookAt(m_camera.pos - g_cameraLookAt, m_camera.pos, m_camera.up) };
+    glm::mat4 view{ glm::lookAt(m_camera.pos - m_camera.lookAt, m_camera.pos, m_camera.up) };
 
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
@@ -346,7 +344,7 @@ void Game::updateEntities(float a_delta)
 void Game::updateCamera()
 {
   auto& physics = m_registry.get<Physics>(m_player);
-  m_camera.pos = physics.position + g_cameraOffset;
+  m_camera.pos = physics.position + m_camera.offset;
 }
 
 void Game::drawEntities()
@@ -408,7 +406,7 @@ void Game::debugDrawEntitiesTree()
 
   ImGui::Begin("Camera");
   ImGui::InputFloat3("position", glm::value_ptr(m_camera.pos));
-  ImGui::InputFloat3("offset", glm::value_ptr(g_cameraOffset));
-  ImGui::InputFloat3("lookAt", glm::value_ptr(g_cameraLookAt));
+  ImGui::InputFloat3("offset", glm::value_ptr(m_camera.offset));
+  ImGui::InputFloat3("lookAt", glm::value_ptr(m_camera.lookAt));
   ImGui::End();
 }
