@@ -32,5 +32,6 @@ find_package(spdlog CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
+find_package(tinyobjloader CONFIG REQUIRED)
 
 add_subdirectory(src)

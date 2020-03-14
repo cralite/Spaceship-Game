@@ -36,4 +36,5 @@ target_link_libraries(SpaceshipGame
 	assimp::assimp
 	nlohmann_json::nlohmann_json
 	glad::glad
+	tinyobjloader::tinyobjloader
 )

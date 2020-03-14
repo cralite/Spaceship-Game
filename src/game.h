@@ -33,12 +33,29 @@ class Game {
   void debugDrawEntitiesTree();
 
  private:
+  enum class EntityType {
+    AsteroidFragment,
+    AsteroidSmall,
+    AsteroidMedium,
+    AsteroidBig,
+    Player,
+    LaserBeam,
+    Count
+  };
+
   SDL_Window *m_window{};
   SDL_GLContext m_context{};
   Shader m_shader{};
   Camera m_camera{};
+
+  Texture m_asteroidsTexture;
+  Texture m_playerTexture;
+  Texture m_laserTexture;
+  std::array<Model, static_cast<size_t>(EntityType::Count)> m_models;
+  
   entt::registry m_registry{};
   entt::entity m_player{};
+  
   std::array<bool, static_cast<size_t>(Key::eCount)> m_keys{};
 };
 

@@ -10,6 +10,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <tiny_obj_loader.h>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -125,5 +127,66 @@ Model Utils::load_model(const std::vector<float>& a_data)
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
+  model.vertices = a_data.size() / 5;
+
   return model;
+}
+
+Model Utils::load_model(std::string_view a_path)
+{
+  tinyobj::attrib_t attribs{};
+  std::vector<tinyobj::shape_t> shapes{};
+
+  std::string warnings{};
+  std::string errors{};
+
+  bool const loaded = tinyobj::LoadObj(&attribs, &shapes, nullptr, &warnings, &errors, a_path.data());
+
+  if (!errors.empty())
+    std::cout << "Errors: " << errors << std::endl;
+
+  if (!warnings.empty())
+    std::cout << "Warning: " << warnings << std::endl;
+
+  if (!loaded)
+    return {};
+
+  std::vector<float> modelVertices{};
+
+  size_t shapesCount = shapes.size();
+
+  // loop over shapes
+  for (size_t s = 0; s < shapesCount; ++s) {
+    size_t indexOffset{};
+
+    auto const& shape = shapes[s];
+    auto const& mesh = shape.mesh;
+
+    size_t const facesSize = mesh.num_face_vertices.size();
+
+    // loop over faces
+    for (size_t f = 0; f < facesSize; ++f) {
+      int const verticesSizePerFace = mesh.num_face_vertices[f];
+
+      // loop over vertices in the face
+      for (size_t vertex = 0; vertex < verticesSizePerFace; ++vertex) {
+        auto& indices = mesh.indices;
+        auto& vertices = attribs.vertices;
+        auto& texCoords = attribs.texcoords;
+
+        tinyobj::index_t const index = indices[indexOffset + vertex];
+
+        modelVertices.push_back(vertices[3 * index.vertex_index + 0]);
+        modelVertices.push_back(vertices[3 * index.vertex_index + 1]);
+        modelVertices.push_back(vertices[3 * index.vertex_index + 2]);
+
+        modelVertices.push_back(texCoords[2 * index.texcoord_index + 0]);
+        modelVertices.push_back(texCoords[2 * index.texcoord_index + 1]);
+      }
+
+      indexOffset += verticesSizePerFace;
+    }
+  }
+
+  return load_model(modelVertices);
 }

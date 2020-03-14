@@ -18,50 +18,6 @@
 
 #include "utils.h"
 
-std::vector<float> g_vertices = {
-  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-  0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-  0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-  0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-  0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-  0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-  0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-  -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-  -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-  -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-  -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-  0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-  0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-  0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-  0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-  0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-  0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-  0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-  0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-  0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-  0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-  0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-  0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-  -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-};
-
 std::random_device g_rd;
 std::mt19937 g_gen{ g_rd() };
 std::uniform_real_distribution<float> g_asteroidAngleVelocity(0.05f, 1.f);
@@ -152,9 +108,23 @@ Game::Game()
   ImGui_ImplOpenGL3_Init("#version 150");
 
   glViewport(0, 0, 1024, 768);
+
   m_shader.program = glCreateProgram();
-  Utils::load_shader("D:/Develop/SpaceshipGame/data/shaders/vertexShader.vert", ShaderType::eVertex, m_shader);
-  Utils::load_shader("D:/Develop/SpaceshipGame/data/shaders/fragmentShader.frag", ShaderType::eFragment, m_shader);
+
+  Utils::load_shader("data/shaders/shader.vert", ShaderType::eVertex, m_shader);
+  Utils::load_shader("data/shaders/shader.frag", ShaderType::eFragment, m_shader);
+
+  m_asteroidsTexture = Utils::load_texture("data/textures/asteroid.png");
+  m_playerTexture = Utils::load_texture("data/textures/player.png");
+  m_laserTexture = Utils::load_texture("data/textures/laser_beam.png");
+
+  m_models[static_cast<size_t>(EntityType::AsteroidFragment)] = Utils::load_model("data/models/asteroid_fragment.obj");
+  m_models[static_cast<size_t>(EntityType::AsteroidSmall)] = Utils::load_model("data/models/asteroid_small.obj");
+  m_models[static_cast<size_t>(EntityType::AsteroidMedium)] = Utils::load_model("data/models/asteroid_medium.obj");
+  m_models[static_cast<size_t>(EntityType::AsteroidBig)] = Utils::load_model("data/models/asteroid_big.obj");
+  m_models[static_cast<size_t>(EntityType::Player)] = Utils::load_model("data/models/player.obj");
+  m_models[static_cast<size_t>(EntityType::LaserBeam)] = Utils::load_model("data/models/laser_beam.obj");
+
   setupCamera();
 
   glEnable(GL_DEBUG_OUTPUT);
@@ -174,9 +144,6 @@ void Game::setupCamera()
 
 void Game::setupEntities()
 {
-  Model playerModel{ Utils::load_model(g_vertices) };
-  Texture playerTexture{ Utils::load_texture("D:/Develop/SpaceshipGame/data/wall.jpg") };
-
   auto spawnEntity = [&](Model &a_model, Texture &a_texture) {
     auto entity = m_registry.create();
     m_registry.assign<Model>(entity, a_model);
@@ -185,7 +152,8 @@ void Game::setupEntities()
     return entity;
   };
 
-  m_player = spawnEntity(playerModel, playerTexture);
+  m_player = spawnEntity(m_models[static_cast<size_t>(EntityType::Player)], m_playerTexture);
+
   auto &playerPhysics = m_registry.get<Physics>(m_player);
   playerPhysics.player = true;
 
@@ -202,9 +170,14 @@ void Game::setupEntities()
     glm::vec3( 6.0f,  1.0f,  3.0f)
   };
 
+  std::uniform_int_distribution<size_t> randomAsteroidType(static_cast<size_t>(EntityType::AsteroidFragment), static_cast<size_t>(EntityType::AsteroidBig));
+
   for (size_t i = 0; i < cubes.size(); ++i) {
-    Model model{ Utils::load_model(g_vertices) };
-    Texture texture{ Utils::load_texture("D:/Develop/SpaceshipGame/data/awesomeface.png") };
+    auto const modelIndex = randomAsteroidType(g_gen);
+    auto const type = static_cast<EntityType>(modelIndex);
+
+    Model model{ m_models[modelIndex] };
+    Texture texture{ m_asteroidsTexture };
 
     auto asteroid = spawnEntity(model, texture);
 
@@ -300,7 +273,11 @@ void Game::gameLoop()
     updatePlayer(delta);
     updateEntities(delta);
 
-    glm::mat4 view{ glm::lookAt(m_camera.pos, m_camera.pos + m_camera.direction, m_camera.up) };
+    updateCamera();
+
+    // camera = player + offset;
+    //auto& playerPosition = m_registry.get<Physics>(m_player).position;
+    glm::mat4 view{ glm::lookAt(m_camera.pos - g_cameraLookAt, m_camera.pos, m_camera.up) };
 
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
@@ -362,11 +339,14 @@ void Game::updateEntities(float a_delta)
     physics.modelMatrix = glm::mat4(1.0f);
     physics.modelMatrix = glm::translate(physics.modelMatrix, physics.position);
     physics.modelMatrix = glm::rotate(physics.modelMatrix, glm::radians(physics.rotationAngle), physics.rotationAxis);
+    physics.modelMatrix = glm::scale(physics.modelMatrix, glm::vec3(0.3f, 0.3, 0.3f));
   }
 }
 
 void Game::updateCamera()
 {
+  auto& physics = m_registry.get<Physics>(m_player);
+  m_camera.pos = physics.position + g_cameraOffset;
 }
 
 void Game::drawEntities()
@@ -386,7 +366,7 @@ void Game::drawEntities()
 
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(physics.modelMatrix));
 
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glDrawArrays(GL_TRIANGLES, 0, model.vertices);
   }
 }
 

@@ -13,6 +13,7 @@ enum class ShaderType {
 
 struct Model {
   uint32_t vao{};
+  uint32_t vertices{};
 };
 
 struct Shader {

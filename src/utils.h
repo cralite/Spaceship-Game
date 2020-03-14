@@ -14,6 +14,7 @@ namespace Utils {
   Texture load_texture(std::string_view a_path);
   void load_shader(std::string_view a_path, ShaderType a_type, Shader& a_shader);
   Model load_model(const std::vector<float>& a_data);
+  Model load_model(std::string_view a_path);
 
 }; // namespace utils
 
