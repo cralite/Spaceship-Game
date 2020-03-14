@@ -66,6 +66,9 @@ std::random_device g_rd;
 std::mt19937 g_gen{ g_rd() };
 std::uniform_real_distribution<float> g_asteroidAngleVelocity(0.05f, 1.f);
 
+glm::vec3 g_cameraOffset{ 0.0f, 1.0f, 1.0f };
+glm::vec3 g_cameraLookAt{ 0.0f, -1.0f, -1.0f };
+
 //void APIENTRY myGlDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 void APIENTRY myGlDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
@@ -313,17 +316,19 @@ void Game::gameLoop()
 
 void Game::updateInput()
 {
+  auto &physics = m_registry.get<Physics>(m_player);
+
   if (m_keys[static_cast<size_t>(Key::eUp)])
-    m_camera.pos += m_camera.speed * m_camera.direction;
+    physics.position += m_camera.speed * m_camera.direction * 0.016f;
 
   if (m_keys[static_cast<size_t>(Key::eDown)])
-    m_camera.pos -= m_camera.speed * m_camera.direction;
+    physics.position -= m_camera.speed * m_camera.direction * 0.016f;
 
   if (m_keys[static_cast<size_t>(Key::eLeft)])
-    m_camera.pos -= glm::normalize(glm::cross(m_camera.direction, m_camera.up)) * m_camera.speed;
+    physics.position -= glm::normalize(glm::cross(m_camera.direction, m_camera.up)) * m_camera.speed;
 
   if (m_keys[static_cast<size_t>(Key::eRight)])
-    m_camera.pos += glm::normalize(glm::cross(m_camera.direction, m_camera.up)) * m_camera.speed;
+    physics.position += glm::normalize(glm::cross(m_camera.direction, m_camera.up)) * m_camera.speed;
 }
 
 void Game::updatePlayer(float a_delta)
@@ -419,5 +424,11 @@ void Game::debugDrawEntitiesTree()
 
   }
 
+  ImGui::End();
+
+  ImGui::Begin("Camera");
+  ImGui::InputFloat3("position", glm::value_ptr(m_camera.pos));
+  ImGui::InputFloat3("offset", glm::value_ptr(g_cameraOffset));
+  ImGui::InputFloat3("lookAt", glm::value_ptr(g_cameraLookAt));
   ImGui::End();
 }

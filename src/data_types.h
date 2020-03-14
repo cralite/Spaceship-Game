@@ -29,13 +29,14 @@ struct Camera {
   glm::vec3 direction{};
   glm::vec3 right{};
   glm::vec3 view{};
-  float speed{ 0.05f };
+  float speed{ 1.00f };
 };
 
 struct Physics {
   glm::mat4 modelMatrix{};
   glm::vec3 position{};
   glm::vec3 velocity{};
+  glm::vec3 acceleration{};
   glm::vec3 rotationAxis{};
   float rotationAngle{};
   float rotationVelocity{};
