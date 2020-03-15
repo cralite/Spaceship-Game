@@ -40,6 +40,7 @@ class Game {
 
   void debugDrawSystem();
   void debugDrawEntitiesTree();
+  void debugDrawParams();
 
  private:
   SDL_Window *m_window{};
@@ -50,7 +51,8 @@ class Game {
   Texture m_asteroidsTexture;
   Texture m_playerTexture;
   Texture m_laserTexture;
-  std::array<Model, static_cast<size_t>(EntityType::Count)> m_models;
+  std::array<Model, static_cast<size_t>(EntityType::Count)> m_models{};
+  std::array<float, static_cast<size_t>(EntityType::Count)> m_scales{};
   
   entt::registry m_registry{};
   entt::entity m_player{};

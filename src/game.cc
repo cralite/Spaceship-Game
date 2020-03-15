@@ -209,6 +209,14 @@ void Game::loadSettings()
     m_settings.spaceshipMass = config["spaceshipMass"].get<float>();
     m_settings.asteroidsAppearanceFrequency = config["asteroidsAppearanceFrequency"].get<float>();
     m_settings.asteroidsApperanceIncrease = config["asteroidsApperanceIncrease"].get<float>();
+
+    auto scales = config["scales"];
+    m_scales[static_cast<size_t>(EntityType::AsteroidFragment)] = scales["AsteroidFragment"].get<float>();
+    m_scales[static_cast<size_t>(EntityType::AsteroidSmall)] = scales["AsteroidSmall"].get<float>();
+    m_scales[static_cast<size_t>(EntityType::AsteroidMedium)] = scales["AsteroidMedium"].get<float>();
+    m_scales[static_cast<size_t>(EntityType::AsteroidBig)] = scales["AsteroidBig"].get<float>();
+    m_scales[static_cast<size_t>(EntityType::LaserBeam)] = scales["LaserBeam"].get<float>();
+    m_scales[static_cast<size_t>(EntityType::Player)] = scales["Player"].get<float>();
   } else {
       std::cerr << "cant load config";
   }
@@ -312,12 +320,15 @@ void Game::gameLoop()
 
     debugDrawSystem();
     debugDrawEntitiesTree();
+    debugDrawParams();
 
     ImGui::Render();
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     SDL_GL_SwapWindow(m_window);
   }
+
+  saveSettings();
 }
 
 void Game::updateInput(float a_delta)
@@ -358,8 +369,6 @@ void Game::updateEntities(float a_delta)
     if (physics.entityType == EntityType::Player)
       continue;
 
-    float const scale = 1.0f;
-
     physics.velocity += physics.acceleration * a_delta;
     physics.position += physics.velocity * a_delta;
     physics.rotationAngle += physics.rotationVelocity * a_delta;
@@ -370,7 +379,7 @@ void Game::updateEntities(float a_delta)
     physics.modelMatrix = glm::mat4(1.0f);
     physics.modelMatrix = glm::translate(physics.modelMatrix, physics.position);
     physics.modelMatrix = glm::rotate(physics.modelMatrix, glm::radians(physics.rotationAngle), physics.rotationAxis);
-    physics.modelMatrix = glm::scale(physics.modelMatrix, glm::vec3(scale));
+    physics.modelMatrix = glm::scale(physics.modelMatrix, glm::vec3(m_scales[static_cast<size_t>(physics.entityType)]));
   }
 }
 
@@ -420,7 +429,7 @@ void Game::shoot()
   physics.entityType = EntityType::LaserBeam;
 
   physics.position = playerPhysics.position;
-  physics.velocity = glm::vec3(0.0f, 0.0f, 15.0f);
+  physics.velocity = glm::vec3(0.0f, 0.0f, m_settings.cannonShootingVelocity);
   physics.rotationAxis= glm::vec3(0.0f, 0.0f, 1.0f);
 }
 
@@ -481,5 +490,34 @@ void Game::debugDrawEntitiesTree()
   ImGui::InputFloat3("position", glm::value_ptr(m_camera.pos));
   ImGui::InputFloat3("offset", glm::value_ptr(m_camera.offset));
   ImGui::InputFloat3("lookAt", glm::value_ptr(m_camera.lookAt));
+  ImGui::End();
+}
+
+void Game::debugDrawParams()
+{
+  ImGui::Begin("Params");
+  
+  ImGui::PushItemWidth(70.0f);
+
+  ImGui::InputFloat("cannonShootingFrequency", &m_settings.cannonShootingFrequency);
+  ImGui::InputFloat("cannonShootingVelocity", &m_settings.cannonShootingVelocity);
+  ImGui::InputFloat("spaceshipForwardVelocity", &m_settings.spaceshipForwardVelocity);
+  ImGui::InputFloat("asteroidsAngularVelocityRange", &m_settings.asteroidsAngularVelocityRange);
+  ImGui::InputFloat("engineThrust", &m_settings.engineThrust);
+  ImGui::InputFloat("spaceshipMass", &m_settings.spaceshipMass);
+  ImGui::InputFloat("asteroidsAppearanceFrequency", &m_settings.asteroidsAppearanceFrequency);
+  ImGui::InputFloat("asteroidsApperanceIncrease", &m_settings.asteroidsApperanceIncrease);
+
+  ImGui::Separator();
+
+  ImGui::InputFloat("scale.AsteroidFragment", &m_scales[static_cast<size_t>(EntityType::AsteroidFragment)]);
+  ImGui::InputFloat("scale.AsteroidSmall", &m_scales[static_cast<size_t>(EntityType::AsteroidSmall)]);
+  ImGui::InputFloat("scale.AsteroidMedium", &m_scales[static_cast<size_t>(EntityType::AsteroidMedium)]);
+  ImGui::InputFloat("scale.AsteroidBig", &m_scales[static_cast<size_t>(EntityType::AsteroidBig)]);
+  ImGui::InputFloat("scale.LaserBeam", &m_scales[static_cast<size_t>(EntityType::LaserBeam)]);
+  ImGui::InputFloat("scale.Player", &m_scales[static_cast<size_t>(EntityType::Player)]);
+
+  ImGui::PopItemWidth();
+
   ImGui::End();
 }

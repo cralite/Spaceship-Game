@@ -1,10 +1,18 @@
 {
 	"cannonShootingFrequency": 5.0,
-	"cannonShootingVelocity": 10.0,
-	"spaceshipForwardVelocity": 2.0,
+	"cannonShootingVelocity": 50.0,
+	"spaceshipForwardVelocity": 5.0,
 	"asteroidsAngularVelocityRange": 10.0,
 	"engineThrust": 5.0,
 	"spaceshipMass": 20.0,
 	"asteroidsAppearanceFrequency": 2.0,
-	"asteroidsApperanceIncrease": 0.1
+	"asteroidsApperanceIncrease": 0.1,
+	"scales": {
+		"AsteroidFragment": 1.0,
+		"AsteroidSmall": 1.0,
+		"AsteroidMedium": 1.0,
+		"AsteroidBig": 1.0,
+		"LaserBeam": 0.5,
+		"Player": 1.0
+	}	
 }
