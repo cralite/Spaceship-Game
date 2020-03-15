@@ -16,7 +16,11 @@ class Game {
   ~Game() = default;
 
   void setupCamera();
-  void setupEntities();
+  void setupPlayer();
+  void popEntity();
+
+  void loadSettings();
+  void saveSettings();
 
   void handleWindowEvent(SDL_Event a_event);
   void handleKeybordEvent(SDL_KeyboardEvent a_key, bool a_pressed);
@@ -59,6 +63,7 @@ class Game {
   glm::mat4 m_projectionMatrix{};
   
   std::array<bool, static_cast<size_t>(Key::eCount)> m_keys{};
+  Settings m_settings{};
 };
 
 #endif // GAME_H

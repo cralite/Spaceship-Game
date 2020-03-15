@@ -123,6 +123,7 @@ Game::Game()
   m_models[static_cast<size_t>(EntityType::Player)] = Utils::load_model("data/models/player.obj");
   m_models[static_cast<size_t>(EntityType::LaserBeam)] = Utils::load_model("data/models/laser_beam.obj");
 
+  loadSettings();
   setupCamera();
 
   glEnable(GL_DEBUG_OUTPUT);
@@ -138,10 +139,10 @@ void Game::setupCamera()
   m_camera.up = glm::vec3(0.0f, 0.0f, 1.0f);
   m_camera.lookAt = glm::vec3(0.0f, -1.0f, 0.0f);
   m_camera.offset = glm::vec3(0.0f, 50.0f, 18.0f);
-  m_camera.direction = glm::vec3(0.0f, -1.0f, 0.0f);
+  m_camera.direction = glm::vec3(0.0f, 0.0f, 1.0f);
 }
 
-void Game::setupEntities()
+void Game::setupPlayer()
 {
   auto spawnEntity = [&](Model &a_model, Texture &a_texture) {
     auto entity = m_registry.create();
@@ -155,24 +156,25 @@ void Game::setupEntities()
 
   auto &playerPhysics = m_registry.get<Physics>(m_player);
   playerPhysics.player = true;
+}
 
-  std::vector<glm::vec3> cubes = {
-    glm::vec3( 2.0f,  5.0f, -15.0f), 
-    glm::vec3(-1.5f, -2.2f, -2.5f),  
-    glm::vec3(-3.8f, -2.0f, -12.3f),  
-    glm::vec3( 2.4f, -0.4f, -3.5f),  
-    glm::vec3(-1.7f,  3.0f, -7.5f),  
-    glm::vec3( 1.3f, -2.0f, -2.5f),  
-    glm::vec3( 1.5f,  2.0f, -2.5f), 
-    glm::vec3( 1.5f,  0.2f, -1.5f), 
-    glm::vec3(-1.3f,  1.0f, -1.5f),
-    glm::vec3( 6.0f,  1.0f,  3.0f)
+void Game::popEntity()
+{
+  auto spawnEntity = [&](Model &a_model, Texture &a_texture) {
+    auto entity = m_registry.create();
+    m_registry.assign<Model>(entity, a_model);
+    m_registry.assign<Texture>(entity, a_texture);
+    m_registry.assign<Physics>(entity, Physics{});
+    return entity;
   };
 
   std::uniform_int_distribution<size_t> randomAsteroidType(static_cast<size_t>(EntityType::AsteroidFragment), 
     static_cast<size_t>(EntityType::AsteroidBig));
 
-  for (size_t i = 0; i < cubes.size(); ++i) {
+  auto playerPhysics = m_registry.get<Physics>(m_player);
+  auto playerPos = playerPhysics.position;
+
+  for (size_t i = 0; i < m_settings.asteroidsAppearanceFrequency; ++i) {
     auto const modelIndex = randomAsteroidType(g_gen);
     auto const type = static_cast<EntityType>(modelIndex);
 
@@ -182,8 +184,9 @@ void Game::setupEntities()
     auto asteroid = spawnEntity(model, texture);
 
     auto &physics = m_registry.get<Physics>(asteroid);
-    std::uniform_real_distribution asteroidPos(-10.0f, 10.0f);
-    physics.position = glm::vec3(asteroidPos(g_gen), 0.0f, asteroidPos(g_gen));
+    std::uniform_real_distribution asteroidPosX(playerPos.x - 10.0f, playerPos.x + 10.f);
+    std::uniform_real_distribution asteroidPosZ(playerPos.z + 10.0f, 30.0f);
+    physics.position = glm::vec3(asteroidPosX(g_gen), 0.0f, asteroidPosZ(g_gen));
     physics.rotationAxis = glm::vec3(1.0f, 0.3f, 0.5f);
     physics.rotationVelocity = g_asteroidAngleVelocity(g_gen);
   }
@@ -193,12 +196,12 @@ void Game::loadSettings()
 {
   using json = nlohmann::json;
 
-  if (auto configData = Utils::open_file("data/config/config.json")) {
+  if (auto configData = Utils::open_file("data/configs/config.json")) {
     json config{ json::parse((*configData).data()) };
     m_settings.cannonShootingFrequency = config["cannonShootingFrequency"].get<float>();
     m_settings.cannonShootingVelocity = config["cannonShootingVelocity"].get<float>();
     m_settings.spaceshipForwardVelocity = config["spaceshipForwardVelocity"].get<float>();
-    m_settings.enginsThrust = config["enginsThrust"].get<float>();
+    m_settings.engineThrust = config["engineThrust"].get<float>();
     m_settings.spaceshipMass = config["spaceshipMass"].get<float>();
     m_settings.asteroidsAppearanceFrequency = config["asteroidsAppearanceFrequency"].get<float>();
     m_settings.asteroidsApperanceIncrease = config["asteroidsApperanceIncrease"].get<float>();
@@ -235,7 +238,7 @@ void Game::gameLoop()
 {
   glEnable(GL_DEPTH_TEST);
 
-  setupEntities();
+  setupPlayer();
 
   using clock_t = std::chrono::high_resolution_clock;
   auto start = clock_t::now();
@@ -250,6 +253,7 @@ void Game::gameLoop()
   m_projectionMatrix = glm::perspective(glm::radians(45.0f), 1280.0f/720.0f, 0.1f, 100.0f);
 
   float clearColor[3]{ 0.2f, 0.3f, 0.3f };
+  popEntity();
 
   while (!quit) {
     SDL_Event event{};
@@ -286,7 +290,7 @@ void Game::gameLoop()
     const auto now = clock_t::now();
     const duration deltaDuration = now - start;
     start = now;
-    double delta{ deltaDuration.count() };
+    double delta{ deltaDuration.count() / 1000.0 };
     time += delta;
 
     updateInput();
@@ -322,7 +326,7 @@ void Game::updatePlayer(float a_delta)
   auto &texture = m_registry.get<Texture>(m_player);
   auto &physics = m_registry.get<Physics>(m_player);
 
-//  physics.position = m_camera.pos + glm::vec3(0.0f, -10.0f, 15.0f);
+  physics.position += m_settings.spaceshipForwardVelocity * m_camera.direction * a_delta;
 
   physics.modelMatrix = glm::mat4(1.0f);
   physics.modelMatrix = glm::translate(physics.modelMatrix, physics.position);
@@ -338,7 +342,7 @@ void Game::updateEntities(float a_delta)
     if (physics.player)
       continue;
 
-    physics.position += physics.velocity * a_delta;
+    //physics.position += physics.velocity * a_delta;
     physics.rotationAngle += physics.rotationVelocity * a_delta;
     
     if (physics.rotationAngle >= 360.f)
@@ -404,6 +408,8 @@ void Game::debugDrawEntitiesTree()
   auto view = m_registry.view<Physics>();
 
   size_t const count = view.size();
+
+  ImGui::Text("Count: %d", count);
 
   for (size_t i = 0; i < count; ++i) {
     auto entity = view[i];

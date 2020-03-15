@@ -59,7 +59,7 @@ struct Settings {
   float cannonShootingVelocity{};
   float spaceshipForwardVelocity{};
   float asteroidsAngularVelocityRange{};
-  float enginsThrust{};
+  float engineThrust{};
   float spaceshipMass{};
   float asteroidsAppearanceFrequency{};
   float asteroidsApperanceIncrease{};
