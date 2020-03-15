@@ -31,7 +31,7 @@ struct Camera {
   glm::vec3 offset{};
   glm::vec3 lookAt{};
   glm::vec3 direction{};
-  float speed{ 1.00f };
+  float speed{ 15.00f };
 };
 
 struct Physics {

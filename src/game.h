@@ -17,7 +17,10 @@ class Game {
 
   void setupCamera();
   void setupPlayer();
-  void popEntity();
+
+  entt::entity spawnEntity(Model &a_model, Texture &a_texture);
+  void spawnAsteroids();
+  void spawnAsteroid();
 
   void loadSettings();
   void saveSettings();
@@ -27,7 +30,7 @@ class Game {
 
   void gameLoop();
  
-  void updateInput();
+  void updateInput(float a_delta);
   void updatePlayer(float a_delta);
   void updateEntities(float a_delta);
   void updateCamera();
@@ -64,6 +67,8 @@ class Game {
   
   std::array<bool, static_cast<size_t>(Key::eCount)> m_keys{};
   Settings m_settings{};
+
+  float m_asteroidsAppearanceFrequency{};
 };
 
 #endif // GAME_H

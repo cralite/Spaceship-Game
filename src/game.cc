@@ -21,7 +21,7 @@
 
 std::random_device g_rd;
 std::mt19937 g_gen{ g_rd() };
-std::uniform_real_distribution<float> g_asteroidAngleVelocity(0.05f, 0.5f);
+std::uniform_real_distribution<float> g_asteroidAngleVelocity(10.05f, 30.5f);
 
 //void APIENTRY myGlDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 void APIENTRY myGlDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
@@ -137,59 +137,65 @@ void Game::setupCamera()
 {
   m_camera.pos = glm::vec3(0.0f, 0.0f, 0.0f);
   m_camera.up = glm::vec3(0.0f, 0.0f, 1.0f);
+  m_camera.direction = glm::vec3(0.0f, 0.0f, 1.0f);
   m_camera.lookAt = glm::vec3(0.0f, -1.0f, 0.0f);
   m_camera.offset = glm::vec3(0.0f, 50.0f, 18.0f);
-  m_camera.direction = glm::vec3(0.0f, 0.0f, 1.0f);
 }
 
 void Game::setupPlayer()
 {
-  auto spawnEntity = [&](Model &a_model, Texture &a_texture) {
-    auto entity = m_registry.create();
-    m_registry.assign<Model>(entity, a_model);
-    m_registry.assign<Texture>(entity, a_texture);
-    m_registry.assign<Physics>(entity, Physics{});
-    return entity;
-  };
-
   m_player = spawnEntity(m_models[static_cast<size_t>(EntityType::Player)], m_playerTexture);
 
   auto &playerPhysics = m_registry.get<Physics>(m_player);
   playerPhysics.player = true;
 }
 
-void Game::popEntity()
+entt::entity Game::spawnEntity(Model& a_model, Texture& a_texture)
 {
-  auto spawnEntity = [&](Model &a_model, Texture &a_texture) {
-    auto entity = m_registry.create();
-    m_registry.assign<Model>(entity, a_model);
-    m_registry.assign<Texture>(entity, a_texture);
-    m_registry.assign<Physics>(entity, Physics{});
-    return entity;
-  };
+  auto entity = m_registry.create();
+  m_registry.assign<Model>(entity, a_model);
+  m_registry.assign<Texture>(entity, a_texture);
+  m_registry.assign<Physics>(entity, Physics{});
+  return entity;
+}
 
+void Game::spawnAsteroids()
+{
+  for (size_t i = 0; i < m_asteroidsAppearanceFrequency; ++i)
+    spawnAsteroid();
+}
+
+void Game::spawnAsteroid()
+{
   std::uniform_int_distribution<size_t> randomAsteroidType(static_cast<size_t>(EntityType::AsteroidFragment), 
     static_cast<size_t>(EntityType::AsteroidBig));
 
-  auto playerPhysics = m_registry.get<Physics>(m_player);
-  auto playerPos = playerPhysics.position;
+  auto &playerPhysics = m_registry.get<Physics>(m_player);
+  auto &playerPos = playerPhysics.position;
 
-  for (size_t i = 0; i < m_settings.asteroidsAppearanceFrequency; ++i) {
-    auto const modelIndex = randomAsteroidType(g_gen);
-    auto const type = static_cast<EntityType>(modelIndex);
+  auto const modelIndex = randomAsteroidType(g_gen);
+  auto const type = static_cast<EntityType>(modelIndex);
 
-    Model model{ m_models[modelIndex] };
-    Texture texture{ m_asteroidsTexture };
+  Model model{ m_models[modelIndex] };
+  Texture texture{ m_asteroidsTexture };
 
-    auto asteroid = spawnEntity(model, texture);
+  auto asteroid = spawnEntity(model, texture);
 
-    auto &physics = m_registry.get<Physics>(asteroid);
-    std::uniform_real_distribution asteroidPosX(playerPos.x - 10.0f, playerPos.x + 10.f);
-    std::uniform_real_distribution asteroidPosZ(playerPos.z + 10.0f, 30.0f);
-    physics.position = glm::vec3(asteroidPosX(g_gen), 0.0f, asteroidPosZ(g_gen));
-    physics.rotationAxis = glm::vec3(1.0f, 0.3f, 0.5f);
-    physics.rotationVelocity = g_asteroidAngleVelocity(g_gen);
-  }
+  auto &physics = m_registry.get<Physics>(asteroid);
+
+  constexpr float distanceMinX = -20.0f;
+  constexpr float distanceMaxX = 20.0f;
+
+  constexpr float distanceMinZ = 40.0f;
+  constexpr float distanceMaxZ = 70.0f;
+
+  std::uniform_real_distribution asteroidPosX(playerPos.x + distanceMinX, playerPos.x + distanceMaxX);
+  std::uniform_real_distribution asteroidPosZ(playerPos.z + distanceMinZ, playerPos.z + distanceMaxZ);
+  std::uniform_real_distribution rotationAxis(-1.0f, 1.0f);
+
+  physics.position = glm::vec3(asteroidPosX(g_gen), 0.0f, asteroidPosZ(g_gen));
+  physics.rotationAxis = glm::vec3(rotationAxis(g_gen), rotationAxis(g_gen), rotationAxis(g_gen));
+  physics.rotationVelocity = g_asteroidAngleVelocity(g_gen);
 }
 
 void Game::loadSettings()
@@ -238,7 +244,7 @@ void Game::gameLoop()
 {
   glEnable(GL_DEPTH_TEST);
 
-  setupPlayer();
+  m_asteroidsAppearanceFrequency = m_settings.asteroidsAppearanceFrequency;
 
   using clock_t = std::chrono::high_resolution_clock;
   auto start = clock_t::now();
@@ -253,7 +259,9 @@ void Game::gameLoop()
   m_projectionMatrix = glm::perspective(glm::radians(45.0f), 1280.0f/720.0f, 0.1f, 100.0f);
 
   float clearColor[3]{ 0.2f, 0.3f, 0.3f };
-  popEntity();
+
+  setupPlayer();
+  spawnAsteroids();
 
   while (!quit) {
     SDL_Event event{};
@@ -280,9 +288,6 @@ void Game::gameLoop()
     ImGui_ImplSDL2_NewFrame(m_window);
     ImGui::NewFrame();
 
-    debugDrawSystem();
-    debugDrawEntitiesTree();
-
     glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.f);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -291,33 +296,44 @@ void Game::gameLoop()
     const duration deltaDuration = now - start;
     start = now;
     double delta{ deltaDuration.count() / 1000.0 };
+
     time += delta;
 
-    updateInput();
+    if (time >= 1.0f) {
+      spawnAsteroids();
+      time = 0.0f;
+    }
+
+    updateInput(delta);
 
     updatePlayer(delta);
     updateEntities(delta);
 
     updateCamera();
 
-    ImGui::Render();
-
     drawEntities();
+
+    debugDrawSystem();
+    debugDrawEntitiesTree();
+
+    ImGui::Render();
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     SDL_GL_SwapWindow(m_window);
   }
 }
 
-void Game::updateInput()
+void Game::updateInput(float a_delta)
 {
   auto &physics = m_registry.get<Physics>(m_player);
 
+  glm::vec3 const direction{ -1.0f, 0.0f, 0.0f };
+
   if (m_keys[static_cast<size_t>(Key::eLeft)])
-    physics.position -= glm::normalize(glm::cross(m_camera.direction, m_camera.up)) * m_camera.speed * 0.016f;
+    physics.position -= direction * m_camera.speed * a_delta;
 
   if (m_keys[static_cast<size_t>(Key::eRight)])
-    physics.position += glm::normalize(glm::cross(m_camera.direction, m_camera.up)) * m_camera.speed * 0.016f;
+    physics.position += direction * m_camera.speed * a_delta;
 }
 
 void Game::updatePlayer(float a_delta)
