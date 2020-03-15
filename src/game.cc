@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <nlohmann/json.hpp>
 
 #include <vector>
 #include <iostream>
@@ -135,8 +136,6 @@ void Game::setupCamera()
 {
   m_camera.pos = glm::vec3(0.0f, 0.0f, 0.0f);
   m_camera.up = glm::vec3(0.0f, 0.0f, 1.0f);
-  //m_camera.lookAt = glm::vec3(0.0f, -2.6f, 1.0f);
-  //m_camera.offset = glm::vec3(0.0f, 40.0f, 0.0f);
   m_camera.lookAt = glm::vec3(0.0f, -1.0f, 0.0f);
   m_camera.offset = glm::vec3(0.0f, 50.0f, 18.0f);
   m_camera.direction = glm::vec3(0.0f, -1.0f, 0.0f);
@@ -188,6 +187,29 @@ void Game::setupEntities()
     physics.rotationAxis = glm::vec3(1.0f, 0.3f, 0.5f);
     physics.rotationVelocity = g_asteroidAngleVelocity(g_gen);
   }
+}
+
+void Game::loadSettings()
+{
+  using json = nlohmann::json;
+
+  if (auto configData = Utils::open_file("data/config/config.json")) {
+    json config{ json::parse((*configData).data()) };
+    m_settings.cannonShootingFrequency = config["cannonShootingFrequency"].get<float>();
+    m_settings.cannonShootingVelocity = config["cannonShootingVelocity"].get<float>();
+    m_settings.spaceshipForwardVelocity = config["spaceshipForwardVelocity"].get<float>();
+    m_settings.enginsThrust = config["enginsThrust"].get<float>();
+    m_settings.spaceshipMass = config["spaceshipMass"].get<float>();
+    m_settings.asteroidsAppearanceFrequency = config["asteroidsAppearanceFrequency"].get<float>();
+    m_settings.asteroidsApperanceIncrease = config["asteroidsApperanceIncrease"].get<float>();
+  } else {
+      std::cerr << "cant load config";
+  }
+}
+
+void Game::saveSettings()
+{
+
 }
 
 void Game::handleWindowEvent(SDL_Event a_event)

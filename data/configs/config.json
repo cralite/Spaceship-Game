@@ -1,0 +1,10 @@
+{
+	"cannonShootingFrequency": 5,
+	"cannonShootingVelocity": 10,
+	"spaceshipForwardVelocity": 2,
+	"asteroidsAngularVelocityRange": 10,
+	"enginsThrust": 5,
+	"spaceshipMass": 20,
+	"asteroidsAppearanceFrequency": 2,
+	"asteroidsApperanceIncrease": 1,
+}

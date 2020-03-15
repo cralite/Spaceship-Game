@@ -54,6 +54,15 @@ enum class Key {
   eCount,
 };
 
-
+struct Settings {
+  float cannonShootingFrequency{};
+  float cannonShootingVelocity{};
+  float spaceshipForwardVelocity{};
+  float asteroidsAngularVelocityRange{};
+  float enginsThrust{};
+  float spaceshipMass{};
+  float asteroidsAppearanceFrequency{};
+  float asteroidsApperanceIncrease{};
+};
 
 #endif //DATA_TYPES_H
