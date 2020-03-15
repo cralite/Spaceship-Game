@@ -72,10 +72,10 @@ void Utils::load_shader(std::string_view a_path, ShaderType a_type, Shader& a_sh
 {
   uint32_t newShader{};
   switch (a_type) {
-    case ShaderType::eVertex:
+    case ShaderType::Vertex:
       newShader = glCreateShader(GL_VERTEX_SHADER);
       break;
-    case ShaderType::eFragment:
+    case ShaderType::Fragment:
       newShader = glCreateShader(GL_FRAGMENT_SHADER);
       break;
   }

@@ -7,8 +7,18 @@
 #include <glm/vec3.hpp>
 
 enum class ShaderType {
-  eVertex,
-  eFragment
+  Vertex,
+  Fragment
+};
+
+enum class EntityType {
+  AsteroidFragment,
+  AsteroidSmall,
+  AsteroidMedium,
+  AsteroidBig,
+  LaserBeam,
+  Player,
+  Count
 };
 
 struct Model {
@@ -42,16 +52,14 @@ struct Physics {
   glm::vec3 rotationAxis{};
   float rotationAngle{};
   float rotationVelocity{};
-  bool player{};
+  EntityType entityType{};
 };
 
 enum class Key {
-  eLeft,
-  eRight,
-  eUp,
-  eDown,
-  eSpace,
-  eCount,
+  Left,
+  Right,
+  Space,
+  Count,
 };
 
 struct Settings {

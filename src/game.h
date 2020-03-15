@@ -36,20 +36,12 @@ class Game {
   void updateCamera();
   void drawEntities();
 
+  void shoot();
+
   void debugDrawSystem();
   void debugDrawEntitiesTree();
 
  private:
-  enum class EntityType {
-    AsteroidFragment,
-    AsteroidSmall,
-    AsteroidMedium,
-    AsteroidBig,
-    Player,
-    LaserBeam,
-    Count
-  };
-
   SDL_Window *m_window{};
   SDL_GLContext m_context{};
   Shader m_shader{};
@@ -65,7 +57,7 @@ class Game {
 
   glm::mat4 m_projectionMatrix{};
   
-  std::array<bool, static_cast<size_t>(Key::eCount)> m_keys{};
+  std::array<bool, static_cast<size_t>(Key::Count)> m_keys{};
   Settings m_settings{};
 
   float m_asteroidsAppearanceFrequency{};
