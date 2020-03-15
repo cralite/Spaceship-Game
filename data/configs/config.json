@@ -14,5 +14,13 @@
 		"AsteroidBig": 1.0,
 		"LaserBeam": 0.5,
 		"Player": 1.0
-	}	
+	},
+	"radius": {
+		"AsteroidFragment": 10.0,
+		"AsteroidSmall": 10.0,
+		"AsteroidMedium": 10.0,
+		"AsteroidBig": 10.0,
+		"LaserBeam": 2.0,
+		"Player": 10.0
+	}
 }

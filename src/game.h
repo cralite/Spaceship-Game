@@ -27,8 +27,12 @@ class Game {
 
   void handleWindowEvent(SDL_Event a_event);
   void handleKeybordEvent(SDL_KeyboardEvent a_key, bool a_pressed);
+  bool isAsteroid(EntityType a_type);
+  bool hasCollision(Physics const& entity1, Physics const& entity2);
 
   void gameLoop();
+
+  std::string_view getEntityTypeName(EntityType a_type);
  
   void updateInput(float a_delta);
   void updatePlayer(float a_delta);
@@ -37,6 +41,7 @@ class Game {
   void drawEntities();
 
   void shoot();
+  void checkCollision();
 
   void debugDrawSystem();
   void debugDrawEntitiesTree();
@@ -53,7 +58,8 @@ class Game {
   Texture m_laserTexture;
   std::array<Model, static_cast<size_t>(EntityType::Count)> m_models{};
   std::array<float, static_cast<size_t>(EntityType::Count)> m_scales{};
-  
+  std::array<float, static_cast<size_t>(EntityType::Count)> m_radiuses{};
+
   entt::registry m_registry{};
   entt::entity m_player{};
 
@@ -61,6 +67,7 @@ class Game {
   
   std::array<bool, static_cast<size_t>(Key::Count)> m_keys{};
   Settings m_settings{};
+  bool m_drawDebugBoxes{};
 
   float m_asteroidsAppearanceFrequency{};
 };

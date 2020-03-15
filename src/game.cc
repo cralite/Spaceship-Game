@@ -23,6 +23,50 @@ std::random_device g_rd;
 std::mt19937 g_gen{ g_rd() };
 std::uniform_real_distribution<float> g_asteroidAngleVelocity(10.05f, 30.5f);
 
+std::vector<float> g_vertices = {
+  -1.0f, -1.0f, -1.0f,  0.0f, 0.0f,
+   1.0f, -1.0f, -1.0f,  1.0f, 0.0f,
+   1.0f,  1.0f, -1.0f,  1.0f, 1.0f,
+   1.0f,  1.0f, -1.0f,  1.0f, 1.0f,
+  -1.0f,  1.0f, -1.0f,  0.0f, 1.0f,
+  -1.0f, -1.0f, -1.0f,  0.0f, 0.0f,
+
+  -1.0f, -1.0f,  1.0f,  0.0f, 0.0f,
+   1.0f, -1.0f,  1.0f,  1.0f, 0.0f,
+   1.0f,  1.0f,  1.0f,  1.0f, 1.0f,
+   1.0f,  1.0f,  1.0f,  1.0f, 1.0f,
+  -1.0f,  1.0f,  1.0f,  0.0f, 1.0f,
+  -1.0f, -1.0f,  1.0f,  0.0f, 0.0f,
+
+  -1.0f,  1.0f,  1.0f,  1.0f, 0.0f,
+  -1.0f,  1.0f, -1.0f,  1.0f, 1.0f,
+  -1.0f, -1.0f, -1.0f,  0.0f, 1.0f,
+  -1.0f, -1.0f, -1.0f,  0.0f, 1.0f,
+  -1.0f, -1.0f,  1.0f,  0.0f, 0.0f,
+  -1.0f,  1.0f,  1.0f,  1.0f, 0.0f,
+
+   1.0f,  1.0f,  1.0f,  1.0f, 0.0f,
+   1.0f,  1.0f, -1.0f,  1.0f, 1.0f,
+   1.0f, -1.0f, -1.0f,  0.0f, 1.0f,
+   1.0f, -1.0f, -1.0f,  0.0f, 1.0f,
+   1.0f, -1.0f,  1.0f,  0.0f, 0.0f,
+   1.0f,  1.0f,  1.0f,  1.0f, 0.0f,
+
+  -1.0f, -1.0f, -1.0f,  0.0f, 1.0f,
+   1.0f, -1.0f, -1.0f,  1.0f, 1.0f,
+   1.0f, -1.0f,  1.0f,  1.0f, 0.0f,
+   1.0f, -1.0f,  1.0f,  1.0f, 0.0f,
+  -1.0f, -1.0f,  1.0f,  0.0f, 0.0f,
+  -1.0f, -1.0f, -1.0f,  0.0f, 1.0f,
+
+  -1.0f,  1.0f, -1.0f,  0.0f, 1.0f,
+   1.0f,  1.0f, -1.0f,  1.0f, 1.0f,
+   1.0f,  1.0f,  1.0f,  1.0f, 0.0f,
+   1.0f,  1.0f,  1.0f,  1.0f, 0.0f,
+  -1.0f,  1.0f,  1.0f,  0.0f, 0.0f,
+  -1.0f,  1.0f, -1.0f,  0.0f, 1.0f
+};
+
 //void APIENTRY myGlDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 void APIENTRY myGlDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
@@ -122,6 +166,7 @@ Game::Game()
   m_models[static_cast<size_t>(EntityType::AsteroidBig)] = Utils::load_model("data/models/asteroid_big.obj");
   m_models[static_cast<size_t>(EntityType::LaserBeam)] = Utils::load_model("data/models/laser_beam.obj");
   m_models[static_cast<size_t>(EntityType::Player)] = Utils::load_model("data/models/player.obj");
+  m_models[static_cast<size_t>(EntityType::Box)] = Utils::load_model(g_vertices);
 
   loadSettings();
   setupCamera();
@@ -161,7 +206,7 @@ entt::entity Game::spawnEntity(Model& a_model, Texture& a_texture)
 
 void Game::spawnAsteroids()
 {
-  for (size_t i = 0; i < m_asteroidsAppearanceFrequency; ++i)
+  //for (size_t i = 0; i < m_asteroidsAppearanceFrequency; ++i)
     spawnAsteroid();
 }
 
@@ -170,13 +215,13 @@ void Game::spawnAsteroid()
   std::uniform_int_distribution<size_t> randomAsteroidType(static_cast<size_t>(EntityType::AsteroidFragment), 
     static_cast<size_t>(EntityType::AsteroidBig));
 
-  auto &playerPhysics = m_registry.get<Physics>(m_player);
-  auto &playerPos = playerPhysics.position;
-
   auto const modelIndex = randomAsteroidType(g_gen);
   auto const type = static_cast<EntityType>(modelIndex);
 
   auto asteroid = spawnEntity(m_models[modelIndex], m_asteroidsTexture);
+
+  auto &playerPhysics = m_registry.get<Physics>(m_player);
+  auto &playerPos = playerPhysics.position;
 
   auto &physics = m_registry.get<Physics>(asteroid);
   physics.entityType = type;
@@ -217,6 +262,14 @@ void Game::loadSettings()
     m_scales[static_cast<size_t>(EntityType::AsteroidBig)] = scales["AsteroidBig"].get<float>();
     m_scales[static_cast<size_t>(EntityType::LaserBeam)] = scales["LaserBeam"].get<float>();
     m_scales[static_cast<size_t>(EntityType::Player)] = scales["Player"].get<float>();
+
+    auto radius = config["radius"];
+    m_radiuses[static_cast<size_t>(EntityType::AsteroidFragment)] = radius["AsteroidFragment"].get<float>();
+    m_radiuses[static_cast<size_t>(EntityType::AsteroidMedium)] = radius["AsteroidMedium"].get<float>();
+    m_radiuses[static_cast<size_t>(EntityType::AsteroidSmall)] = radius["AsteroidSmall"].get<float>();
+    m_radiuses[static_cast<size_t>(EntityType::AsteroidBig)] = radius["AsteroidBig"].get<float>();
+    m_radiuses[static_cast<size_t>(EntityType::LaserBeam)] = radius["LaserBeam"].get<float>();
+    m_radiuses[static_cast<size_t>(EntityType::Player)] = scales["Player"].get<float>();
   } else {
       std::cerr << "cant load config";
   }
@@ -242,6 +295,22 @@ void Game::handleKeybordEvent(SDL_KeyboardEvent a_key, bool a_pressed)
     m_keys[static_cast<size_t>(Key::Left)] = a_pressed;
   else if (a_key.keysym.sym == SDLK_RIGHT)
     m_keys[static_cast<size_t>(Key::Right)] = a_pressed;
+}
+
+bool Game::isAsteroid(EntityType a_type)
+{
+  return a_type == EntityType::AsteroidBig || a_type == EntityType::AsteroidFragment ||
+    a_type == EntityType::AsteroidMedium || a_type == EntityType::AsteroidSmall;
+}
+
+bool Game::hasCollision(Physics const& entity1, Physics const& entity2)
+{
+  auto const type1 = static_cast<size_t>(entity1.entityType);
+  auto const type2 = static_cast<size_t>(entity2.entityType);
+
+  auto length = glm::length(entity1.position - entity2.position);
+  int l = static_cast<int>(length);
+  return length <= (m_radiuses[type1] + m_radiuses[type2]);
 }
 
 void Game::gameLoop()
@@ -303,9 +372,8 @@ void Game::gameLoop()
 
     time += delta;
 
-    if (time >= 1.0f) {
+    if (time >= 3.0f) {
       spawnAsteroids();
-      shoot();
       time = 0.0f;
     }
 
@@ -313,6 +381,7 @@ void Game::gameLoop()
 
     updatePlayer(delta);
     updateEntities(delta);
+    checkCollision();
 
     updateCamera();
 
@@ -329,6 +398,21 @@ void Game::gameLoop()
   }
 
   saveSettings();
+}
+
+std::string_view Game::getEntityTypeName(EntityType a_type)
+{
+  switch (a_type)
+  {
+    case EntityType::AsteroidFragment: return "AsteroidFragment";
+    case EntityType::AsteroidSmall: return "AsteroidSmall";
+    case EntityType::AsteroidMedium: return "AsteroidMedium";
+    case EntityType::AsteroidBig: return "AsteroidBig";
+    case EntityType::Player: return "Player";
+    case EntityType::LaserBeam: return "LaserBeam";
+  }
+
+  return "<unknown>";
 }
 
 void Game::updateInput(float a_delta)
@@ -357,6 +441,10 @@ void Game::updatePlayer(float a_delta)
 
   physics.modelMatrix = glm::mat4(1.0f);
   physics.modelMatrix = glm::translate(physics.modelMatrix, physics.position);
+
+  physics.debugBoxMatrix = glm::mat4(1.0f);
+  physics.debugBoxMatrix = glm::translate(physics.debugBoxMatrix, physics.position);
+  physics.debugBoxMatrix = glm::scale(physics.debugBoxMatrix, glm::vec3(m_radiuses[static_cast<size_t>(physics.entityType)]));
 }
 
 void Game::updateEntities(float a_delta)
@@ -380,6 +468,10 @@ void Game::updateEntities(float a_delta)
     physics.modelMatrix = glm::translate(physics.modelMatrix, physics.position);
     physics.modelMatrix = glm::rotate(physics.modelMatrix, glm::radians(physics.rotationAngle), physics.rotationAxis);
     physics.modelMatrix = glm::scale(physics.modelMatrix, glm::vec3(m_scales[static_cast<size_t>(physics.entityType)]));
+
+    physics.debugBoxMatrix = glm::mat4(1.0f);
+    physics.debugBoxMatrix = glm::translate(physics.debugBoxMatrix, physics.position);
+    physics.debugBoxMatrix = glm::scale(physics.debugBoxMatrix, glm::vec3(m_radiuses[static_cast<size_t>(physics.entityType)]));
   }
 }
 
@@ -416,14 +508,28 @@ void Game::drawEntities()
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(physics.modelMatrix));
 
     glDrawArrays(GL_TRIANGLES, 0, model.vertices);
+
+    if (m_drawDebugBoxes) {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+      auto& boxModel = m_models[static_cast<size_t>(EntityType::Box)];
+
+      glBindVertexArray(boxModel.vao);
+
+      glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(physics.debugBoxMatrix));
+
+      glDrawArrays(GL_TRIANGLES, 0, model.vertices);
+
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
   }
 }
 
 void Game::shoot()
 {
-  auto &playerPhysics = m_registry.get<Physics>(m_player);
-
   auto entity = spawnEntity(m_models[static_cast<size_t>(EntityType::LaserBeam)], m_laserTexture);
+
+  auto &playerPhysics = m_registry.get<Physics>(m_player);
 
   auto &physics = m_registry.get<Physics>(entity);
   physics.entityType = EntityType::LaserBeam;
@@ -433,11 +539,51 @@ void Game::shoot()
   physics.rotationAxis= glm::vec3(0.0f, 0.0f, 1.0f);
 }
 
+void Game::checkCollision()
+{
+  auto view = m_registry.view<Physics>();
+
+  for (int i = 0; i < view.size(); ++i) {
+    auto &physics1 = view.get<Physics>(view[i]);
+    auto const& type1 = physics1.entityType;
+
+    for (int j = i + 1; j < view.size(); ++j) {
+      auto &physics2 = view.get<Physics>(view[j]);
+      auto const& type2 = physics2.entityType;
+
+      if (isAsteroid(type1) && isAsteroid(type2))
+        continue;
+
+      if (type1 == EntityType::LaserBeam && type2 == EntityType::LaserBeam)
+        continue;
+
+      if ((type1 == EntityType::Player && type2 == EntityType::LaserBeam) ||
+          (type1 == EntityType::LaserBeam && type2 == EntityType::Player))
+        continue;
+
+      bool const collision = hasCollision(physics1, physics2);
+
+      if (!collision)
+        continue;
+
+      std::cout << "Collision between " << getEntityTypeName(type1) << " - " << getEntityTypeName(type2) << std::endl;
+
+      if ((type1 == EntityType::LaserBeam && isAsteroid(type2)) ||
+          (isAsteroid(type1) && type2 == EntityType::LaserBeam)) {
+      }
+    }
+  }
+}
+
 void Game::debugDrawSystem()
 {
   ImGuiIO& io = ImGui::GetIO();
 
   ImGui::Begin("System");
+  if (ImGui::Checkbox("Debug boxes", &m_drawDebugBoxes))
+  {
+
+  }
   ImGui::Text("Frame time: %.3f ms", 1000.0f / io.Framerate);
   ImGui::Text("FPS: %.3f ms", io.Framerate);
   ImGui::End();
@@ -457,21 +603,7 @@ void Game::debugDrawEntitiesTree()
     auto entity = view[i];
     auto &physics = view.get<Physics>(entity);
 
-    const std::string_view entityType = [&] {
-      switch (physics.entityType)
-      {
-        case EntityType::AsteroidFragment: return "AsteroidFragment";
-        case EntityType::AsteroidSmall: return "AsteroidSmall";
-        case EntityType::AsteroidMedium: return "AsteroidMedium";
-        case EntityType::AsteroidBig: return "AsteroidBig";
-        case EntityType::Player: return "Player";
-        case EntityType::LaserBeam: return "LaserBeam";
-      }
-
-      return "<unknown>";
-    }();
-
-    if (ImGui::TreeNode((void*)(intptr_t)i, "Entity #%02d (%s)", i, entityType.data()))
+    if (ImGui::TreeNode((void*)(intptr_t)i, "Entity #%02d (%s)", i, getEntityTypeName(physics.entityType).data()))
     {
       ImGui::InputFloat3("position", glm::value_ptr(physics.position));
       ImGui::InputFloat3("velocity", glm::value_ptr(physics.velocity));
@@ -517,6 +649,15 @@ void Game::debugDrawParams()
   ImGui::InputFloat("scale.LaserBeam", &m_scales[static_cast<size_t>(EntityType::LaserBeam)]);
   ImGui::InputFloat("scale.Player", &m_scales[static_cast<size_t>(EntityType::Player)]);
 
+  ImGui::Separator();
+
+  ImGui::InputFloat("radius.AsteroidFragment", &m_radiuses[static_cast<size_t>(EntityType::AsteroidFragment)]);
+  ImGui::InputFloat("radius.AsteroidSmall", &m_radiuses[static_cast<size_t>(EntityType::AsteroidSmall)]);
+  ImGui::InputFloat("radius.AsteroidMedium", &m_radiuses[static_cast<size_t>(EntityType::AsteroidMedium)]);
+  ImGui::InputFloat("radius.AsteroidBig", &m_radiuses[static_cast<size_t>(EntityType::AsteroidBig)]);
+  ImGui::InputFloat("radius.LaserBeam", &m_radiuses[static_cast<size_t>(EntityType::LaserBeam)]);
+  ImGui::InputFloat("radius.Player", &m_radiuses[static_cast<size_t>(EntityType::Player)]);
+  
   ImGui::PopItemWidth();
 
   ImGui::End();

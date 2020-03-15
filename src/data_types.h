@@ -18,6 +18,7 @@ enum class EntityType {
   AsteroidBig,
   LaserBeam,
   Player,
+  Box,
   Count
 };
 
@@ -46,6 +47,7 @@ struct Camera {
 
 struct Physics {
   glm::mat4 modelMatrix{};
+  glm::mat4 debugBoxMatrix{};
   glm::vec3 position{};
   glm::vec3 velocity{};
   glm::vec3 acceleration{};
