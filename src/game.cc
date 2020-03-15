@@ -20,7 +20,7 @@
 
 std::random_device g_rd;
 std::mt19937 g_gen{ g_rd() };
-std::uniform_real_distribution<float> g_asteroidAngleVelocity(0.05f, 1.f);
+std::uniform_real_distribution<float> g_asteroidAngleVelocity(0.05f, 0.5f);
 
 //void APIENTRY myGlDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 void APIENTRY myGlDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
@@ -92,7 +92,7 @@ Game::Game()
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
-  m_window = SDL_CreateWindow("SpaceGame", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
+  m_window = SDL_CreateWindow("SpaceGame", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
   m_context = SDL_GL_CreateContext(m_window);
 
   gladLoadGLLoader(SDL_GL_GetProcAddress);
@@ -104,7 +104,7 @@ Game::Game()
   ImGui_ImplSDL2_InitForOpenGL(m_window, m_context);
   ImGui_ImplOpenGL3_Init("#version 150");
 
-  glViewport(0, 0, 1024, 768);
+  glViewport(0, 0, 1280, 720);
 
   m_shader.program = glCreateProgram();
 
@@ -133,11 +133,13 @@ Game::Game()
 
 void Game::setupCamera()
 {
-  m_camera.pos = glm::vec3(0.0f, 0.0f, 3.0f);
-  m_camera.up = glm::vec3(0.0f, 1.0f, 0.0f);
-  m_camera.lookAt = glm::vec3(0.0f, -6.0f, -6.0f);
-  m_camera.offset = glm::vec3(0.0f, 2.0f, 2.0f);
-  m_camera.direction = glm::vec3(0.0f, 0.0f, -1.0f);
+  m_camera.pos = glm::vec3(0.0f, 0.0f, 0.0f);
+  m_camera.up = glm::vec3(0.0f, 0.0f, 1.0f);
+  //m_camera.lookAt = glm::vec3(0.0f, -2.6f, 1.0f);
+  //m_camera.offset = glm::vec3(0.0f, 40.0f, 0.0f);
+  m_camera.lookAt = glm::vec3(0.0f, -1.0f, 0.0f);
+  m_camera.offset = glm::vec3(0.0f, 50.0f, 18.0f);
+  m_camera.direction = glm::vec3(0.0f, -1.0f, 0.0f);
 }
 
 void Game::setupEntities()
@@ -168,7 +170,8 @@ void Game::setupEntities()
     glm::vec3( 6.0f,  1.0f,  3.0f)
   };
 
-  std::uniform_int_distribution<size_t> randomAsteroidType(static_cast<size_t>(EntityType::AsteroidFragment), static_cast<size_t>(EntityType::AsteroidBig));
+  std::uniform_int_distribution<size_t> randomAsteroidType(static_cast<size_t>(EntityType::AsteroidFragment), 
+    static_cast<size_t>(EntityType::AsteroidBig));
 
   for (size_t i = 0; i < cubes.size(); ++i) {
     auto const modelIndex = randomAsteroidType(g_gen);
@@ -180,7 +183,8 @@ void Game::setupEntities()
     auto asteroid = spawnEntity(model, texture);
 
     auto &physics = m_registry.get<Physics>(asteroid);
-    physics.position = cubes[i];
+    std::uniform_real_distribution asteroidPos(-10.0f, 10.0f);
+    physics.position = glm::vec3(asteroidPos(g_gen), 0.0f, asteroidPos(g_gen));
     physics.rotationAxis = glm::vec3(1.0f, 0.3f, 0.5f);
     physics.rotationVelocity = g_asteroidAngleVelocity(g_gen);
   }
@@ -219,12 +223,9 @@ void Game::gameLoop()
   glDepthMask(true);
   glUseProgram(m_shader.program);
 
-  uint32_t const modelLocation = glGetUniformLocation(m_shader.program, "view");
-  uint32_t const projectionLocation = glGetUniformLocation(m_shader.program, "projection");
-
   bool quit{};
 
-  glm::mat4 projection{ glm::perspective(glm::radians(45.0f), 1024.0f/768.0f, 0.1f, 100.0f) };
+  m_projectionMatrix = glm::perspective(glm::radians(45.0f), 1280.0f/720.0f, 0.1f, 100.0f);
 
   float clearColor[3]{ 0.2f, 0.3f, 0.3f };
 
@@ -273,13 +274,6 @@ void Game::gameLoop()
 
     updateCamera();
 
-    // camera = player + offset;
-    //auto& playerPosition = m_registry.get<Physics>(m_player).position;
-    glm::mat4 view{ glm::lookAt(m_camera.pos - m_camera.lookAt, m_camera.pos, m_camera.up) };
-
-    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
-
     ImGui::Render();
 
     drawEntities();
@@ -293,17 +287,11 @@ void Game::updateInput()
 {
   auto &physics = m_registry.get<Physics>(m_player);
 
-  if (m_keys[static_cast<size_t>(Key::eUp)])
-    physics.position += m_camera.speed * m_camera.direction * 0.016f;
-
-  if (m_keys[static_cast<size_t>(Key::eDown)])
-    physics.position -= m_camera.speed * m_camera.direction * 0.016f;
-
   if (m_keys[static_cast<size_t>(Key::eLeft)])
-    physics.position -= glm::normalize(glm::cross(m_camera.direction, m_camera.up)) * m_camera.speed;
+    physics.position -= glm::normalize(glm::cross(m_camera.direction, m_camera.up)) * m_camera.speed * 0.016f;
 
   if (m_keys[static_cast<size_t>(Key::eRight)])
-    physics.position += glm::normalize(glm::cross(m_camera.direction, m_camera.up)) * m_camera.speed;
+    physics.position += glm::normalize(glm::cross(m_camera.direction, m_camera.up)) * m_camera.speed * 0.016f;
 }
 
 void Game::updatePlayer(float a_delta)
@@ -337,7 +325,7 @@ void Game::updateEntities(float a_delta)
     physics.modelMatrix = glm::mat4(1.0f);
     physics.modelMatrix = glm::translate(physics.modelMatrix, physics.position);
     physics.modelMatrix = glm::rotate(physics.modelMatrix, glm::radians(physics.rotationAngle), physics.rotationAxis);
-    physics.modelMatrix = glm::scale(physics.modelMatrix, glm::vec3(0.3f, 0.3, 0.3f));
+    physics.modelMatrix = glm::scale(physics.modelMatrix, glm::vec3(1.0f));
   }
 }
 
@@ -345,6 +333,15 @@ void Game::updateCamera()
 {
   auto& physics = m_registry.get<Physics>(m_player);
   m_camera.pos = physics.position + m_camera.offset;
+  m_camera.pos.x = 0.0f;
+
+  glm::mat4 view{ glm::lookAt(m_camera.pos, m_camera.pos + m_camera.lookAt, m_camera.up) };
+
+  uint32_t const modelLocation = glGetUniformLocation(m_shader.program, "view");
+  uint32_t const projectionLocation = glGetUniformLocation(m_shader.program, "projection");
+
+  glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(view));
+  glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(m_projectionMatrix));
 }
 
 void Game::drawEntities()
@@ -405,6 +402,7 @@ void Game::debugDrawEntitiesTree()
   ImGui::End();
 
   ImGui::Begin("Camera");
+  ImGui::InputFloat3("up", glm::value_ptr(m_camera.up));
   ImGui::InputFloat3("position", glm::value_ptr(m_camera.pos));
   ImGui::InputFloat3("offset", glm::value_ptr(m_camera.offset));
   ImGui::InputFloat3("lookAt", glm::value_ptr(m_camera.lookAt));

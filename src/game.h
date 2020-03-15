@@ -55,6 +55,8 @@ class Game {
   
   entt::registry m_registry{};
   entt::entity m_player{};
+
+  glm::mat4 m_projectionMatrix{};
   
   std::array<bool, static_cast<size_t>(Key::eCount)> m_keys{};
 };
