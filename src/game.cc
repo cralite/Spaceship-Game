@@ -270,6 +270,13 @@ void Game::loadSettings()
     m_radiuses[static_cast<size_t>(EntityType::AsteroidBig)] = radius["AsteroidBig"].get<float>();
     m_radiuses[static_cast<size_t>(EntityType::LaserBeam)] = radius["LaserBeam"].get<float>();
     m_radiuses[static_cast<size_t>(EntityType::Player)] = scales["Player"].get<float>();
+
+
+    auto points = config["points"];
+    m_pointsPerAsteroid[static_cast<size_t>(EntityType::AsteroidFragment)] = points["AsteroidFragment"].get<int32_t>();
+    m_pointsPerAsteroid[static_cast<size_t>(EntityType::AsteroidMedium)] = points["AsteroidMedium"].get<int32_t>();
+    m_pointsPerAsteroid[static_cast<size_t>(EntityType::AsteroidSmall)] = points["AsteroidSmall"].get<int32_t>();
+    m_pointsPerAsteroid[static_cast<size_t>(EntityType::AsteroidBig)] = points["AsteroidBig"].get<int32_t>();
   } else {
       std::cerr << "cant load config";
   }
@@ -322,7 +329,10 @@ void Game::gameLoop()
   using clock_t = std::chrono::high_resolution_clock;
   auto start = clock_t::now();
   using duration = std::chrono::duration<double, std::milli>;
-  double time{};
+  double asteroidSpawnTime{};
+  double lasersSpawnTime{};
+
+  double laserTimeDiff = 1.0 / m_settings.cannonShootingFrequency;
 
   glDepthMask(true);
   glUseProgram(m_shader.program);
@@ -370,14 +380,26 @@ void Game::gameLoop()
     start = now;
     double delta{ deltaDuration.count() / 1000.0 };
 
-    time += delta;
+    asteroidSpawnTime += delta;
 
-    if (time >= 3.0f) {
+    if (asteroidSpawnTime >= 1.0f) {
       spawnAsteroids();
-      time = 0.0f;
+      asteroidSpawnTime = 0.0f;
     }
 
     updateInput(delta);
+
+    if (m_shoot) {
+      if (lasersSpawnTime >= laserTimeDiff)
+        lasersSpawnTime = 0.0f;
+
+      if (lasersSpawnTime == 0.0)
+        shoot();
+
+      lasersSpawnTime += delta;
+    }
+    else
+      lasersSpawnTime = 0.0;
 
     updatePlayer(delta);
     updateEntities(delta);
@@ -386,6 +408,8 @@ void Game::gameLoop()
     updateCamera();
 
     drawEntities();
+
+    drawPoints();
 
     debugDrawSystem();
     debugDrawEntitiesTree();
@@ -427,8 +451,7 @@ void Game::updateInput(float a_delta)
   if (m_keys[static_cast<size_t>(Key::Right)])
     physics.position += direction * m_camera.speed * a_delta;
 
-  if (m_keys[static_cast<size_t>(Key::Space)])
-    shoot();
+  m_shoot = m_keys[static_cast<size_t>(Key::Space)];
 }
 
 void Game::updatePlayer(float a_delta)
@@ -525,6 +548,13 @@ void Game::drawEntities()
   }
 }
 
+void Game::drawPoints()
+{
+  ImGui::Begin("Points");
+  ImGui::Text("%d", m_points);
+  ImGui::End();
+}
+
 void Game::shoot()
 {
   auto entity = spawnEntity(m_models[static_cast<size_t>(EntityType::LaserBeam)], m_laserTexture);
@@ -543,12 +573,16 @@ void Game::checkCollision()
 {
   auto view = m_registry.view<Physics>();
 
+  m_collided.clear();
+
   for (int i = 0; i < view.size(); ++i) {
-    auto &physics1 = view.get<Physics>(view[i]);
+    auto entity1 = view[i];
+    auto &physics1 = view.get<Physics>(entity1);
     auto const& type1 = physics1.entityType;
 
     for (int j = i + 1; j < view.size(); ++j) {
-      auto &physics2 = view.get<Physics>(view[j]);
+      auto entity2 = view[j];
+      auto &physics2 = view.get<Physics>(entity2);
       auto const& type2 = physics2.entityType;
 
       if (isAsteroid(type1) && isAsteroid(type2))
@@ -570,8 +604,27 @@ void Game::checkCollision()
 
       if ((type1 == EntityType::LaserBeam && isAsteroid(type2)) ||
           (isAsteroid(type1) && type2 == EntityType::LaserBeam)) {
+        m_collided.push_back(std::make_pair(entity1, entity2));
       }
     }
+  }
+
+  while (!m_collided.empty()) {
+    auto pair = m_collided.back();
+    auto entity1 = pair.first;
+    auto entity2 = pair.second;
+
+    auto type1 = view.get<Physics>(entity1).entityType;
+    auto type2= view.get<Physics>(entity2).entityType;
+
+    auto type = isAsteroid(type1) ? type1 : type2;
+
+    m_registry.destroy(entity1);
+    m_registry.destroy(entity2);
+
+    m_collided.pop_back();
+
+    m_points += m_pointsPerAsteroid[static_cast<size_t>(type)];
   }
 }
 
