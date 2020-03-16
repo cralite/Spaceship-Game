@@ -324,7 +324,6 @@ void Game::gameLoop()
 {
   glEnable(GL_DEPTH_TEST);
 
-  m_asteroidsAppearanceFrequency = m_settings.asteroidsAppearanceFrequency;
 
   using clock_t = std::chrono::high_resolution_clock;
   auto start = clock_t::now();
@@ -343,8 +342,7 @@ void Game::gameLoop()
 
   float clearColor[3]{ 0.2f, 0.3f, 0.3f };
 
-  setupPlayer();
-  spawnAsteroids();
+  reset();
 
   while (!quit) {
     SDL_Event event{};
@@ -380,30 +378,34 @@ void Game::gameLoop()
     start = now;
     double delta{ deltaDuration.count() / 1000.0 };
 
-    asteroidSpawnTime += delta;
+    if (m_gameState == GameState::Playing) {
+      asteroidSpawnTime += delta;
 
-    if (asteroidSpawnTime >= 1.0f) {
-      spawnAsteroids();
-      asteroidSpawnTime = 0.0f;
+      if (asteroidSpawnTime >= 1.0f) {
+        spawnAsteroids();
+        asteroidSpawnTime = 0.0f;
+      }
+
+      updateInput(delta);
+
+      if (m_shoot) {
+        if (lasersSpawnTime >= laserTimeDiff)
+          lasersSpawnTime = 0.0f;
+
+        if (lasersSpawnTime == 0.0)
+          shoot();
+
+        lasersSpawnTime += delta;
+      }
+      else
+        lasersSpawnTime = 0.0;
+
+      updatePlayer(delta);
+      updateEntities(delta);
+      checkCollision();
+    } else {
+      drawEndGame();
     }
-
-    updateInput(delta);
-
-    if (m_shoot) {
-      if (lasersSpawnTime >= laserTimeDiff)
-        lasersSpawnTime = 0.0f;
-
-      if (lasersSpawnTime == 0.0)
-        shoot();
-
-      lasersSpawnTime += delta;
-    }
-    else
-      lasersSpawnTime = 0.0;
-
-    updatePlayer(delta);
-    updateEntities(delta);
-    checkCollision();
 
     updateCamera();
 
@@ -411,9 +413,9 @@ void Game::gameLoop()
 
     drawPoints();
 
-    debugDrawSystem();
-    debugDrawEntitiesTree();
-    debugDrawParams();
+    //debugDrawSystem();
+    //debugDrawEntitiesTree();
+    //debugDrawParams();
 
     ImGui::Render();
 
@@ -555,6 +557,15 @@ void Game::drawPoints()
   ImGui::End();
 }
 
+void Game::drawEndGame()
+{
+  ImGui::Begin("##EndGame");
+  ImGui::Text("You lost!");
+  if (ImGui::Button("Restart"))
+    reset();
+  ImGui::End();
+}
+
 void Game::shoot()
 {
   auto entity = spawnEntity(m_models[static_cast<size_t>(EntityType::LaserBeam)], m_laserTexture);
@@ -606,6 +617,11 @@ void Game::checkCollision()
           (isAsteroid(type1) && type2 == EntityType::LaserBeam)) {
         m_collided.push_back(std::make_pair(entity1, entity2));
       }
+
+      if ((type1 == EntityType::Player && isAsteroid(type2)) ||
+          (isAsteroid(type1) && type2 == EntityType::Player)) {
+        m_gameState = GameState::EndGame;
+      }
     }
   }
 
@@ -626,6 +642,18 @@ void Game::checkCollision()
 
     m_points += m_pointsPerAsteroid[static_cast<size_t>(type)];
   }
+}
+
+void Game::reset()
+{
+  m_gameState = GameState::Playing;
+  m_asteroidsAppearanceFrequency = m_settings.asteroidsAppearanceFrequency;
+  m_points = 0;
+
+  m_registry.clear();
+
+  setupPlayer();
+  spawnAsteroids();
 }
 
 void Game::debugDrawSystem()

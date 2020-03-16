@@ -40,13 +40,17 @@ public:
   void updateCamera();
   void drawEntities();
   void drawPoints();
+  void drawEndGame();
 
   void shoot();
   void checkCollision();
 
+  void reset();
+
   void debugDrawSystem();
   void debugDrawEntitiesTree();
   void debugDrawParams();
+
 
 private:
   SDL_Window* m_window{};
@@ -71,6 +75,7 @@ private:
   std::vector<std::pair<entt::entity, entt::entity>> m_collided{};
   Settings m_settings{};
   uint32_t m_points{};
+  GameState m_gameState{};
   bool m_shoot{};
   bool m_drawDebugBoxes{};
 

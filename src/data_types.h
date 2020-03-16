@@ -64,6 +64,11 @@ enum class Key {
   Count,
 };
 
+enum class GameState {
+  Playing,
+  EndGame
+};
+
 struct Settings {
   float cannonShootingFrequency{};
   float cannonShootingVelocity{};
