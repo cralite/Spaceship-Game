@@ -2,6 +2,7 @@
 #define E_DATA_TYPE_H
 
 #include <cstdint>
+#include <array>
 
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
@@ -59,12 +60,16 @@ namespace EngineDataType {
     EntityType entityType{};
   };
 
+
+  enum class Key {
+    Left,
+    Right,
+    Space,
+    Quit,
+    Count,
+  };
+
+  using KEYS = std::array<bool, static_cast<size_t>(Key::Count)>;
 }
-enum class Key {
-  Left,
-  Right,
-  Space,
-  Count,
-};
 
 #endif // E_DATA_TYPE_H

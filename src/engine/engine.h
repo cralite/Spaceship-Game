@@ -10,6 +10,7 @@
 
 #include <map>
 
+
 class Engine {
  public:
    Engine();
@@ -18,22 +19,26 @@ class Engine {
    void loadTextures();
    void loadModels();
    void prepareScene();
-
-   bool hasCollision(EngineDataType::Physics const& entity1, EngineDataType::Physics const& entity2);
-   std::vector<std::pair<entt::entity, entt::entity>> checkCollision();
    
    void handleWindowEvent(SDL_Event a_event);
-   void handleKeybordEvent(SDL_KeyboardEvent a_key, bool a_pressed);
+   void handleKeybordEvent();
    
    entt::entity spawnEntity(EngineDataType::EntityType a_entityType);
    void updateCamera(entt::entity& a_player);
    void drawEntities();
+   bool hasCollision(EngineDataType::Physics const& entity1, EngineDataType::Physics const& entity2);
+   std::vector<std::pair<entt::entity, entt::entity>> checkCollision();
    
    void updateAllEntities(entt::entity& a_entity, float a_delta);
    void clearColor(float color[3]);
    void swapWindow();
 
+   //TODO rethink this - maybe separate struct/class for this type of functions?
+   void moveEntityLeft(entt::entity& a_entity, float a_delta);
+   void moveEntityRight(entt::entity& a_entity, float a_delta);
+
    EngineDataType::Physics& getPhysics(entt::entity& a_entity);
+   bool getKeyStatus(EngineDataType::Key a_key);
 
  private:
    void setupCamera();
@@ -49,7 +54,9 @@ class Engine {
 
    entt::registry m_registry{};
    glm::mat4 m_projectionMatrix{};
+   glm::vec3 m_lookDirection{};
 
+   EngineDataType::KEYS m_keys{};
    std::map<EngineDataType::EntityType, EngineDataType::Model> m_models{};
    std::map<EngineDataType::EntityType, EngineDataType::Texture> m_textures{};
 

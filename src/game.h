@@ -50,7 +50,6 @@ private:
 
   entt::entity m_player{};
 
-  std::array<bool, static_cast<size_t>(Key::Count)> m_keys{};
   std::array<float, static_cast<size_t>(EngineDataType::EntityType::Count)> m_scales{};
   std::array<float, static_cast<size_t>(EngineDataType::EntityType::Count)> m_radiuses{};
 

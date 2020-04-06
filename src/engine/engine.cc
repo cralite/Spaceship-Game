@@ -7,6 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
+#include <array>
 
 std::vector<float> g_vertices = {
   -1.0f, -1.0f, -1.0f,  0.0f, 0.0f,
@@ -163,6 +164,7 @@ void Engine::prepareScene()
   glUseProgram(m_shader.program);
 
   m_projectionMatrix = glm::perspective(glm::radians(45.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
+  m_lookDirection = glm::vec3(-1.0f, 0.0f, 0.0f);
 }
 
 void Engine::setupCamera()
@@ -199,15 +201,34 @@ void Engine::handleWindowEvent(SDL_Event a_event)
   //};
 }
 
-void Engine::handleKeybordEvent(SDL_KeyboardEvent a_key, bool a_pressed)
+void Engine::handleKeybordEvent()
 {
-  //TODO input
-  //if (a_key.keysym.sym == SDLK_SPACE)
-  //  m_keys[static_cast<size_t>(Key::Space)] = a_pressed;
-  //else if (a_key.keysym.sym == SDLK_LEFT)
-  //  m_keys[static_cast<size_t>(Key::Left)] = a_pressed;
-  //else if (a_key.keysym.sym == SDLK_RIGHT)
-  //  m_keys[static_cast<size_t>(Key::Right)] = a_pressed;
+  auto getKeys = [this](SDL_KeyboardEvent a_key, bool a_pressed) {
+    if (a_key.keysym.sym == SDLK_SPACE)
+      m_keys[static_cast<size_t>(EngineDataType::Key::Space)] = a_pressed;
+    else if (a_key.keysym.sym == SDLK_LEFT)
+      m_keys[static_cast<size_t>(EngineDataType::Key::Left)] = a_pressed;
+    else if (a_key.keysym.sym == SDLK_RIGHT)
+      m_keys[static_cast<size_t>(EngineDataType::Key::Right)] = a_pressed;
+  };
+
+  SDL_Event event{};
+  if (SDL_PollEvent(&event)) {
+
+    switch (event.type) {
+    case SDL_QUIT:
+      m_keys[static_cast<size_t>(EngineDataType::Key::Quit)] = true;
+      break;
+      //case SDL_WINDOWEVENT:
+        //handleWindowEvent()
+    case SDL_KEYUP:
+      getKeys(event.key, false);
+      break;
+    case SDL_KEYDOWN:
+      getKeys(event.key, true);
+      break;
+    };
+  }
 }
 
 entt::entity Engine::spawnEntity(EngineDataType::EntityType a_entityType)
@@ -291,9 +312,26 @@ void Engine::swapWindow()
   SDL_GL_SwapWindow(m_window);
 }
 
+void Engine::moveEntityLeft(entt::entity& a_entity, float a_delta)
+{
+  auto& physics = m_registry.get<EngineDataType::Physics>(a_entity);
+  physics.position -= m_lookDirection * m_camera.speed * a_delta;
+}
+
+void Engine::moveEntityRight(entt::entity& a_entity, float a_delta)
+{
+  auto& physics = m_registry.get<EngineDataType::Physics>(a_entity);
+  physics.position += m_lookDirection * m_camera.speed * a_delta;
+}
+
 EngineDataType::Physics& Engine::getPhysics(entt::entity& a_entity)
 {
   return m_registry.get<EngineDataType::Physics>(a_entity);
+}
+
+bool Engine::getKeyStatus(EngineDataType::Key a_key)
+{
+  return m_keys[static_cast<size_t>(a_key)];
 }
 
 void Engine::updatePlayer(entt::entity& a_entity, float a_delta)

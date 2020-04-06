@@ -150,25 +150,7 @@ void Game::gameLoop()
   reset();
 
   while (!quit) {
-    SDL_Event event{};
-
-    if (SDL_PollEvent(&event)) {
-      ImGui_ImplSDL2_ProcessEvent(&event);
-
-      switch (event.type) {
-        case SDL_QUIT:
-          quit = true;
-          break;
-        //case SDL_WINDOWEVENT:
-          //handleWindowEvent()
-        case SDL_KEYUP:
-          m_engine.handleKeybordEvent(event.key, false);
-          break;
-        case SDL_KEYDOWN:
-          m_engine.handleKeybordEvent(event.key, true);
-          break;
-      };
-    }
+    m_engine.handleKeybordEvent();
 
     //TODO Fix imgui
     //ImGui_ImplOpenGL3_NewFrame();
@@ -190,6 +172,7 @@ void Game::gameLoop()
       }
 
       updateInput(delta);
+      quit = m_engine.getKeyStatus(EngineDataType::Key::Quit);
 
       if (m_shoot) {
         if (lasersSpawnTime >= laserTimeDiff)
@@ -213,15 +196,16 @@ void Game::gameLoop()
 
     m_engine.drawEntities();
 
-    drawPoints();
+    //TODO imgui
+    //drawPoints();
 
     //debugDrawSystem();
     //debugDrawEntitiesTree();
     //debugDrawParams();
 
-    ImGui::Render();
+    //ImGui::Render();
 
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    //ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     m_engine.swapWindow();
   }
 
@@ -244,19 +228,14 @@ std::string_view Game::getEngineDataType(EngineDataType::EntityType a_type)
 }
 
 void Game::updateInput(float a_delta)
-{
-  //TODO update input
-  //auto& physics = m_registry.get<Physics>(m_player);
-  //
-  //glm::vec3 const direction{ -1.0f, 0.0f, 0.0f };
-  //
-  //if (m_keys[static_cast<size_t>(Key::Left)])
-  //  physics.position -= direction * m_camera.speed * a_delta;
-  //
-  //if (m_keys[static_cast<size_t>(Key::Right)])
-  //  physics.position += direction * m_camera.speed * a_delta;
-  //
-  //m_shoot = m_keys[static_cast<size_t>(Key::Space)];
+{ 
+  if (m_engine.getKeyStatus(EngineDataType::Key::Left))
+    m_engine.moveEntityLeft(m_player, a_delta);
+  
+  if (m_engine.getKeyStatus(EngineDataType::Key::Right))
+    m_engine.moveEntityRight(m_player, a_delta);
+  
+  m_shoot = m_engine.getKeyStatus(EngineDataType::Key::Space);
 }
 
 
