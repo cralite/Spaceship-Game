@@ -271,68 +271,27 @@ void Game::shoot()
 
 void Game::checkCollision()
 {
-  //TODO collision
-  //auto view = m_registry.view<Physics>();
+  auto& collided = m_engine.getCollided();
 
-  //m_collided.clear();
+  for (auto it : collided) {
+    auto entity1 = it.first;
+    auto type1 = m_engine.getPhysics(entity1).entityType;
 
-  //for (int i = 0; i < view.size(); ++i) {
-  //  auto entity1 = view[i];
-  //  auto &physics1 = view.get<Physics>(entity1);
-  //  auto const& type1 = physics1.EngineDataType::EntityType;
-  //
-  //  for (int j = i + 1; j < view.size(); ++j) {
-  //    auto entity2 = view[j];
-  //    auto &physics2 = view.get<Physics>(entity2);
-  //    auto const& type2 = physics2.EngineDataType::EntityType;
-  //
-  //    if (isAsteroid(type1) && isAsteroid(type2))
-  //      continue;
-  //
-  //    if (type1 == EngineDataType::EntityType::LaserBeam && type2 == EngineDataType::EntityType::LaserBeam)
-  //      continue;
-  //
-  //    if ((type1 == EngineDataType::EntityType::Player && type2 == EngineDataType::EntityType::LaserBeam) ||
-  //        (type1 == EngineDataType::EntityType::LaserBeam && type2 == EngineDataType::EntityType::Player))
-  //      continue;
-  //
-  //    bool const collision = m_engine.hasCollision(physics1, physics2);
-  //
-  //    if (!collision)
-  //      continue;
-  //
-  //    //std::cout << "Collision between " << getEngineDataType(type1) << " - " << getEngineDataType(type2) << std::endl;
-  //
-  //    if ((type1 == EngineDataType::EntityType::LaserBeam && isAsteroid(type2)) ||
-  //        (isAsteroid(type1) && type2 == EngineDataType::EntityType::LaserBeam)) {
-  //      //m_collided.push_back(std::make_pair(entity1, entity2));
-  //    }
-  //
-  //    if ((type1 == EngineDataType::EntityType::Player && isAsteroid(type2)) ||
-  //        (isAsteroid(type1) && type2 == EngineDataType::EntityType::Player)) {
-  //      m_gameState = GameState::EndGame;
-  //    }
-  //  }
-  //}
-  //
-  ////while (!m_collided.empty()) {
-  //while () {
-  //  auto pair = m_collided.back();
-  //  auto entity1 = pair.first;
-  //  auto entity2 = pair.second;
-  //
-  //  auto type1 = view.get<Physics>(entity1).EngineDataType::EntityType;
-  //  auto type2= view.get<Physics>(entity2).EngineDataType::EntityType;
-  //
-  //  auto type = isAsteroid(type1) ? type1 : type2;
-  //
-  //  m_registry.destroy(entity1);
-  //  m_registry.destroy(entity2);
-  //
-  //  m_collided.pop_back();
-  //
-  //  m_points += m_pointsPerAsteroid[static_cast<size_t>(type)];
-  //}
+    auto entity2 = it.second;
+    auto type2 = m_engine.getPhysics(entity2).entityType;
+
+    if ((type1 == EngineDataType::EntityType::Player && type2 == EngineDataType::EntityType::LaserBeam) ||
+      (type1 == EngineDataType::EntityType::LaserBeam && type2 == EngineDataType::EntityType::Player))  
+      continue;
+
+    if ((isAsteroid(type1) && type2 == EngineDataType::EntityType::LaserBeam) ||
+      (type1 == EngineDataType::EntityType::LaserBeam && isAsteroid(type2))) {
+      auto asteroid = isAsteroid(type1) ? type1 : type2;
+      m_engine.destroyEntity(entity1);
+      m_engine.destroyEntity(entity2);
+      m_points += m_pointsPerAsteroid[static_cast<size_t>(asteroid)];
+    }
+  }
 }
 
 void Game::reset()

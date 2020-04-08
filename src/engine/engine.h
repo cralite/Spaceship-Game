@@ -5,7 +5,6 @@
 
 #include <SDL.h>
 #include <glad/glad.h>
-#include <entt/entt.hpp>
 #include <glm/matrix.hpp>
 
 #include <map>
@@ -26,8 +25,7 @@ class Engine {
    entt::entity spawnEntity(EngineDataType::EntityType a_entityType);
    void updateCamera(entt::entity& a_player);
    void drawEntities();
-   bool hasCollision(EngineDataType::Physics const& entity1, EngineDataType::Physics const& entity2);
-   std::vector<std::pair<entt::entity, entt::entity>> checkCollision();
+   void destroyEntity(entt::entity& a_entity);
    
    void updateAllEntities(entt::entity& a_entity, float a_delta);
    void clearColor(float color[3]);
@@ -39,11 +37,16 @@ class Engine {
 
    EngineDataType::Physics& getPhysics(entt::entity& a_entity);
    bool getKeyStatus(EngineDataType::Key a_key);
+   EngineDataType::COLLIDED& getCollided();
 
  private:
    void setupCamera();
    void updatePlayer(entt::entity& a_entity, float a_delta);
    void updateEntities(float a_delta);
+
+   //TODO the same as below, maybe separate?
+   bool hasCollision(EngineDataType::Physics const& entity1, EngineDataType::Physics const& entity2);
+   void checkCollision();
 
  private:
    SDL_Window* m_window{};
@@ -60,7 +63,7 @@ class Engine {
    std::map<EngineDataType::EntityType, EngineDataType::Model> m_models{};
    std::map<EngineDataType::EntityType, EngineDataType::Texture> m_textures{};
 
-   std::vector<std::pair<entt::entity, entt::entity>> m_collided{};
+   EngineDataType::COLLIDED m_collided{};
 };
 
 #endif //ENGINE_H

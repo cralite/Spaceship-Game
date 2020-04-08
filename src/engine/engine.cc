@@ -188,10 +188,34 @@ bool Engine::hasCollision(EngineDataType::Physics const& entity1, EngineDataType
   return false;
 }
 
-std::vector<std::pair<entt::entity, entt::entity>> Engine::checkCollision()
+void Engine::checkCollision()
 {
-  //TODO collision
-  return {};
+  auto view = m_registry.view<EngineDataType::Physics>();
+
+  m_collided.clear();
+
+  for (int i = 0; i < view.size(); ++i) {
+    auto entity1 = view[i];
+    auto &physics1 = view.get<EngineDataType::Physics>(entity1);
+    auto const& type1 = physics1.entityType;
+  
+    for (int j = i + 1; j < view.size(); ++j) {
+      auto entity2 = view[j];
+      auto &physics2 = view.get<EngineDataType::Physics>(entity2);
+      auto const& type2 = physics2.entityType;
+  
+      if (type1 == type2)
+        continue;
+  
+      bool const collision = hasCollision(physics1, physics2);
+      //TODO settings - radiuses
+  
+      if (!collision)
+        continue;
+  
+      m_collided.push_back(std::make_pair(entity1, entity2));
+    }
+  }
 }
 
 void Engine::handleWindowEvent(SDL_Event a_event)
@@ -295,6 +319,11 @@ void Engine::drawEntities()
   }
 }
 
+void Engine::destroyEntity(entt::entity& a_entity)
+{
+  m_registry.destroy(a_entity);
+}
+
 void Engine::updateAllEntities(entt::entity& a_entity, float a_delta)
 {
   updatePlayer(a_entity, a_delta);
@@ -332,6 +361,12 @@ EngineDataType::Physics& Engine::getPhysics(entt::entity& a_entity)
 bool Engine::getKeyStatus(EngineDataType::Key a_key)
 {
   return m_keys[static_cast<size_t>(a_key)];
+}
+
+EngineDataType::COLLIDED& Engine::getCollided()
+{
+  checkCollision();
+  return m_collided;
 }
 
 void Engine::updatePlayer(entt::entity& a_entity, float a_delta)
