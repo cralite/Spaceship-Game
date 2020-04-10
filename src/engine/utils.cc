@@ -40,7 +40,7 @@ std::optional<std::string> Utils::open_file(std::string_view a_path)
   return output;
 }
 
-EngineDataType::Texture Utils::load_texture(std::string_view a_path)
+engineDataType::Texture Utils::load_texture(std::string_view a_path)
 {
   stbi_set_flip_vertically_on_load(true);
 
@@ -51,7 +51,7 @@ EngineDataType::Texture Utils::load_texture(std::string_view a_path)
     return {};
   }
 
-  EngineDataType::Texture texture{};
+  engineDataType::Texture texture{};
   glGenTextures(1, &texture.texture);
   glBindTexture(GL_TEXTURE_2D, texture.texture);
 
@@ -69,14 +69,14 @@ EngineDataType::Texture Utils::load_texture(std::string_view a_path)
   return texture;
 }
 
-void Utils::load_shader(std::string_view a_path, EngineDataType::ShaderType a_type, EngineDataType::Shader& a_shader)
+void Utils::load_shader(std::string_view a_path, engineDataType::ShaderType a_type, engineDataType::Shader& a_shader)
 {
   uint32_t newShader{};
   switch (a_type) {
-  case EngineDataType::ShaderType::Vertex:
+  case engineDataType::ShaderType::Vertex:
     newShader = glCreateShader(GL_VERTEX_SHADER);
     break;
-  case EngineDataType::ShaderType::Fragment:
+  case engineDataType::ShaderType::Fragment:
     newShader = glCreateShader(GL_FRAGMENT_SHADER);
     break;
   }
@@ -106,11 +106,11 @@ void Utils::load_shader(std::string_view a_path, EngineDataType::ShaderType a_ty
   glDeleteShader(newShader);
 }
 
-EngineDataType::Model Utils::load_model(const std::vector<float>& a_data)
+engineDataType::Model Utils::load_model(const std::vector<float>& a_data)
 {
   uint32_t vbo{};
 
-  EngineDataType::Model model{};
+  engineDataType::Model model{};
   glGenVertexArrays(1, &model.vao);
   glGenBuffers(1, &vbo);
 
@@ -133,7 +133,7 @@ EngineDataType::Model Utils::load_model(const std::vector<float>& a_data)
   return model;
 }
 
-EngineDataType::Model Utils::load_model(std::string_view a_path)
+engineDataType::Model Utils::load_model(std::string_view a_path)
 {
   tinyobj::attrib_t attribs{};
   std::vector<tinyobj::shape_t> shapes{};

@@ -22,7 +22,7 @@ class Engine {
    void handleWindowEvent(SDL_Event a_event);
    void handleKeybordEvent();
    
-   entt::entity spawnEntity(EngineDataType::EntityType a_entityType);
+   entt::entity spawnEntity(engineDataType::EntityType a_entityType);
    void updateCamera(entt::entity& a_player);
    void drawEntities();
    void destroyEntity(entt::entity& a_entity);
@@ -35,9 +35,9 @@ class Engine {
    void moveEntityLeft(entt::entity& a_entity, float a_delta);
    void moveEntityRight(entt::entity& a_entity, float a_delta);
 
-   EngineDataType::Physics& getPhysics(entt::entity& a_entity);
-   bool getKeyStatus(EngineDataType::Key a_key);
-   EngineDataType::COLLIDED& getCollided();
+   engineDataType::Physics& getPhysics(entt::entity& a_entity);
+   bool getKeyStatus(engineDataType::Key a_key);
+   engineDataType::Collided& getCollided();
 
  private:
    void setupCamera();
@@ -45,25 +45,25 @@ class Engine {
    void updateEntities(float a_delta);
 
    //TODO the same as below, maybe separate?
-   bool hasCollision(EngineDataType::Physics const& entity1, EngineDataType::Physics const& entity2);
+   bool hasCollision(engineDataType::Physics const& entity1, engineDataType::Physics const& entity2);
    void checkCollision();
 
  private:
    SDL_Window* m_window{};
    SDL_GLContext m_context{};
 
-   EngineDataType::Shader m_shader{};
-   EngineDataType::Camera m_camera{};
+   engineDataType::Shader m_shader{};
+   engineDataType::Camera m_camera{};
 
    entt::registry m_registry{};
    glm::mat4 m_projectionMatrix{};
    glm::vec3 m_lookDirection{};
 
-   EngineDataType::KEYS m_keys{};
-   std::map<EngineDataType::EntityType, EngineDataType::Model> m_models{};
-   std::map<EngineDataType::EntityType, EngineDataType::Texture> m_textures{};
+   engineDataType::Keys m_keys{};
+   std::map<engineDataType::EntityType, engineDataType::Model> m_models{};
+   std::map<engineDataType::EntityType, engineDataType::Texture> m_textures{};
 
-   EngineDataType::COLLIDED m_collided{};
+   engineDataType::Collided m_collided{};
 };
 
 #endif //ENGINE_H

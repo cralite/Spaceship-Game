@@ -130,8 +130,8 @@ Engine::Engine()
   glViewport(0, 0, 1280, 720);
 
   m_shader.program = glCreateProgram();
-  Utils::load_shader("data/shaders/shader.vert", EngineDataType::ShaderType::Vertex, m_shader);
-  Utils::load_shader("data/shaders/shader.frag", EngineDataType::ShaderType::Fragment, m_shader);
+  Utils::load_shader("data/shaders/shader.vert", engineDataType::ShaderType::Vertex, m_shader);
+  Utils::load_shader("data/shaders/shader.frag", engineDataType::ShaderType::Fragment, m_shader);
 
   setupCamera();
   glEnable(GL_DEBUG_OUTPUT);
@@ -142,20 +142,20 @@ Engine::Engine()
 
 void Engine::loadTextures()
 {
-  m_textures[EngineDataType::EntityType::AsteroidBig] = Utils::load_texture("data/textures/asteroid.png");
-  m_textures[EngineDataType::EntityType::Player] = Utils::load_texture("data/textures/player.png");
-  m_textures[EngineDataType::EntityType::LaserBeam] = Utils::load_texture("data/textures/laser_beam.png");
+  m_textures[engineDataType::EntityType::AsteroidBig] = Utils::load_texture("data/textures/asteroid.png");
+  m_textures[engineDataType::EntityType::Player] = Utils::load_texture("data/textures/player.png");
+  m_textures[engineDataType::EntityType::LaserBeam] = Utils::load_texture("data/textures/laser_beam.png");
 }
 
 void Engine::loadModels()
 {
-  m_models[EngineDataType::EntityType::AsteroidFragment] = Utils::load_model("data/models/asteroid_fragment.obj");
-  m_models[EngineDataType::EntityType::AsteroidSmall] = Utils::load_model("data/models/asteroid_small.obj");
-  m_models[EngineDataType::EntityType::AsteroidMedium] = Utils::load_model("data/models/asteroid_medium.obj");
-  m_models[EngineDataType::EntityType::AsteroidBig] = Utils::load_model("data/models/asteroid_big.obj");
-  m_models[EngineDataType::EntityType::LaserBeam] = Utils::load_model("data/models/laser_beam.obj");
-  m_models[EngineDataType::EntityType::Player] = Utils::load_model("data/models/player.obj");
-  m_models[EngineDataType::EntityType::Box] = Utils::load_model(g_vertices);
+  m_models[engineDataType::EntityType::AsteroidFragment] = Utils::load_model("data/models/asteroid_fragment.obj");
+  m_models[engineDataType::EntityType::AsteroidSmall] = Utils::load_model("data/models/asteroid_small.obj");
+  m_models[engineDataType::EntityType::AsteroidMedium] = Utils::load_model("data/models/asteroid_medium.obj");
+  m_models[engineDataType::EntityType::AsteroidBig] = Utils::load_model("data/models/asteroid_big.obj");
+  m_models[engineDataType::EntityType::LaserBeam] = Utils::load_model("data/models/laser_beam.obj");
+  m_models[engineDataType::EntityType::Player] = Utils::load_model("data/models/player.obj");
+  m_models[engineDataType::EntityType::Box] = Utils::load_model(g_vertices);
 }
 
 void Engine::prepareScene()
@@ -176,7 +176,7 @@ void Engine::setupCamera()
   m_camera.offset = glm::vec3(0.0f, 50.0f, 18.0f);
 }
 
-bool Engine::hasCollision(EngineDataType::Physics const& entity1, EngineDataType::Physics const& entity2)
+bool Engine::hasCollision(engineDataType::Physics const& entity1, engineDataType::Physics const& entity2)
 {
   auto const type1 = static_cast<size_t>(entity1.entityType);
   auto const type2 = static_cast<size_t>(entity2.entityType);
@@ -190,18 +190,18 @@ bool Engine::hasCollision(EngineDataType::Physics const& entity1, EngineDataType
 
 void Engine::checkCollision()
 {
-  auto view = m_registry.view<EngineDataType::Physics>();
+  auto view = m_registry.view<engineDataType::Physics>();
 
   m_collided.clear();
 
   for (int i = 0; i < view.size(); ++i) {
     auto entity1 = view[i];
-    auto &physics1 = view.get<EngineDataType::Physics>(entity1);
+    auto &physics1 = view.get<engineDataType::Physics>(entity1);
     auto const& type1 = physics1.entityType;
   
     for (int j = i + 1; j < view.size(); ++j) {
       auto entity2 = view[j];
-      auto &physics2 = view.get<EngineDataType::Physics>(entity2);
+      auto &physics2 = view.get<engineDataType::Physics>(entity2);
       auto const& type2 = physics2.entityType;
   
       if (type1 == type2)
@@ -229,11 +229,11 @@ void Engine::handleKeybordEvent()
 {
   auto getKeys = [this](SDL_KeyboardEvent a_key, bool a_pressed) {
     if (a_key.keysym.sym == SDLK_SPACE)
-      m_keys[static_cast<size_t>(EngineDataType::Key::Space)] = a_pressed;
+      m_keys[static_cast<size_t>(engineDataType::Key::Space)] = a_pressed;
     else if (a_key.keysym.sym == SDLK_LEFT)
-      m_keys[static_cast<size_t>(EngineDataType::Key::Left)] = a_pressed;
+      m_keys[static_cast<size_t>(engineDataType::Key::Left)] = a_pressed;
     else if (a_key.keysym.sym == SDLK_RIGHT)
-      m_keys[static_cast<size_t>(EngineDataType::Key::Right)] = a_pressed;
+      m_keys[static_cast<size_t>(engineDataType::Key::Right)] = a_pressed;
   };
 
   SDL_Event event{};
@@ -241,7 +241,7 @@ void Engine::handleKeybordEvent()
 
     switch (event.type) {
     case SDL_QUIT:
-      m_keys[static_cast<size_t>(EngineDataType::Key::Quit)] = true;
+      m_keys[static_cast<size_t>(engineDataType::Key::Quit)] = true;
       break;
       //case SDL_WINDOWEVENT:
         //handleWindowEvent()
@@ -255,21 +255,21 @@ void Engine::handleKeybordEvent()
   }
 }
 
-entt::entity Engine::spawnEntity(EngineDataType::EntityType a_entityType)
+entt::entity Engine::spawnEntity(engineDataType::EntityType a_entityType)
 {
   auto entity = m_registry.create();
-  m_registry.assign<EngineDataType::Model>(entity, m_models[a_entityType]);
-  m_registry.assign<EngineDataType::Texture>(entity, m_textures[a_entityType]);
-  EngineDataType::Physics physics{};
+  m_registry.assign<engineDataType::Model>(entity, m_models[a_entityType]);
+  m_registry.assign<engineDataType::Texture>(entity, m_textures[a_entityType]);
+  engineDataType::Physics physics{};
   physics.entityType = a_entityType;
-  m_registry.assign<EngineDataType::Physics>(entity, physics);
+  m_registry.assign<engineDataType::Physics>(entity, physics);
 
   return entity;
 }
 
 void Engine::updateCamera(entt::entity& a_player)
 {
-  auto& physics = m_registry.get<EngineDataType::Physics>(a_player);
+  auto& physics = m_registry.get<engineDataType::Physics>(a_player);
   m_camera.pos = physics.position + m_camera.offset;
   m_camera.pos.x = 0.0f;
 
@@ -284,14 +284,14 @@ void Engine::updateCamera(entt::entity& a_player)
 
 void Engine::drawEntities()
 {
-  auto view = m_registry.view<EngineDataType::Texture, EngineDataType::Model, EngineDataType::Physics>();
+  auto view = m_registry.view<engineDataType::Texture, engineDataType::Model, engineDataType::Physics>();
 
   int modelLoc{ glGetUniformLocation(m_shader.program, "model") };
 
   for (auto entity : view) {
-    auto& model = view.get<EngineDataType::Model>(entity);
-    auto& texture = view.get<EngineDataType::Texture>(entity);
-    auto& physics = view.get<EngineDataType::Physics>(entity);
+    auto& model = view.get<engineDataType::Model>(entity);
+    auto& texture = view.get<engineDataType::Texture>(entity);
+    auto& physics = view.get<engineDataType::Physics>(entity);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture.texture);
@@ -306,7 +306,7 @@ void Engine::drawEntities()
     if (false) {
       glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-      auto& boxModel = m_models[EngineDataType::EntityType::Box];
+      auto& boxModel = m_models[engineDataType::EntityType::Box];
 
       glBindVertexArray(boxModel.vao);
 
@@ -343,27 +343,27 @@ void Engine::swapWindow()
 
 void Engine::moveEntityLeft(entt::entity& a_entity, float a_delta)
 {
-  auto& physics = m_registry.get<EngineDataType::Physics>(a_entity);
+  auto& physics = m_registry.get<engineDataType::Physics>(a_entity);
   physics.position -= m_lookDirection * m_camera.speed * a_delta;
 }
 
 void Engine::moveEntityRight(entt::entity& a_entity, float a_delta)
 {
-  auto& physics = m_registry.get<EngineDataType::Physics>(a_entity);
+  auto& physics = m_registry.get<engineDataType::Physics>(a_entity);
   physics.position += m_lookDirection * m_camera.speed * a_delta;
 }
 
-EngineDataType::Physics& Engine::getPhysics(entt::entity& a_entity)
+engineDataType::Physics& Engine::getPhysics(entt::entity& a_entity)
 {
-  return m_registry.get<EngineDataType::Physics>(a_entity);
+  return m_registry.get<engineDataType::Physics>(a_entity);
 }
 
-bool Engine::getKeyStatus(EngineDataType::Key a_key)
+bool Engine::getKeyStatus(engineDataType::Key a_key)
 {
   return m_keys[static_cast<size_t>(a_key)];
 }
 
-EngineDataType::COLLIDED& Engine::getCollided()
+engineDataType::Collided& Engine::getCollided()
 {
   checkCollision();
   return m_collided;
@@ -371,9 +371,9 @@ EngineDataType::COLLIDED& Engine::getCollided()
 
 void Engine::updatePlayer(entt::entity& a_entity, float a_delta)
 {
-  auto& model = m_registry.get<EngineDataType::Model>(a_entity);
-  auto& texture = m_registry.get<EngineDataType::Texture>(a_entity);
-  auto& physics = m_registry.get<EngineDataType::Physics>(a_entity);
+  auto& model = m_registry.get<engineDataType::Model>(a_entity);
+  auto& texture = m_registry.get<engineDataType::Texture>(a_entity);
+  auto& physics = m_registry.get<engineDataType::Physics>(a_entity);
 
   //TODO deliver settings to engine
   physics.position += 1.1f * m_camera.direction * a_delta;
@@ -388,12 +388,12 @@ void Engine::updatePlayer(entt::entity& a_entity, float a_delta)
 
 void Engine::updateEntities(float a_delta)
 {
-  auto view = m_registry.view<EngineDataType::Physics>();
+  auto view = m_registry.view<engineDataType::Physics>();
 
   for (auto entity : view) {
-    auto& physics = view.get<EngineDataType::Physics>(entity);
+    auto& physics = view.get<engineDataType::Physics>(entity);
 
-    if (physics.entityType == EngineDataType::EntityType::Player)
+    if (physics.entityType == engineDataType::EntityType::Player)
       continue;
 
     physics.velocity += physics.acceleration * a_delta;

@@ -9,7 +9,7 @@
 #include <glm/vec3.hpp>
 #include <entt/entt.hpp>
 
-namespace EngineDataType {
+namespace engineDataType {
 
   enum class EntityType {
     AsteroidFragment,
@@ -71,8 +71,8 @@ namespace EngineDataType {
     Count,
   };
 
-  using KEYS = std::array<bool, static_cast<size_t>(Key::Count)>;
-  using COLLIDED = std::vector<std::pair<entt::entity, entt::entity>>;
+  using Keys = std::array<bool, static_cast<size_t>(Key::Count)>;
+  using Collided = std::vector<std::pair<entt::entity, entt::entity>>;
 }
 
 #endif // E_DATA_TYPE_H

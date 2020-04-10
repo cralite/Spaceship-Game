@@ -38,7 +38,7 @@ Game::Game()
 
 void Game::setupPlayer()
 {
-  m_player = m_engine.spawnEntity(EngineDataType::EntityType::Player);
+  m_player = m_engine.spawnEntity(engineDataType::EntityType::Player);
 }
 
 void Game::spawnAsteroids()
@@ -49,13 +49,13 @@ void Game::spawnAsteroids()
 
 void Game::spawnAsteroid()
 {
-  std::uniform_int_distribution<size_t> randomAsteroidType(static_cast<size_t>(EngineDataType::EntityType::AsteroidFragment), 
-    static_cast<size_t>(EngineDataType::EntityType::AsteroidBig));
+  std::uniform_int_distribution<size_t> randomAsteroidType(static_cast<size_t>(engineDataType::EntityType::AsteroidFragment), 
+    static_cast<size_t>(engineDataType::EntityType::AsteroidBig));
 
   auto const modelIndex = randomAsteroidType(g_gen);
-  auto const type = static_cast<EngineDataType::EntityType>(modelIndex);
+  auto const type = static_cast<engineDataType::EntityType>(modelIndex);
 
-  auto asteroid = m_engine.spawnEntity(EngineDataType::EntityType::AsteroidBig);
+  auto asteroid = m_engine.spawnEntity(engineDataType::EntityType::AsteroidBig);
 
   auto& playerPhysics = m_engine.getPhysics(m_player);
   auto &playerPos = playerPhysics.position;
@@ -91,27 +91,27 @@ void Game::loadSettings()
     m_settings.asteroidsApperanceIncrease = config["asteroidsApperanceIncrease"].get<float>();
 
     auto scales = config["scales"];
-    m_scales[static_cast<size_t>(EngineDataType::EntityType::AsteroidFragment)] = scales["AsteroidFragment"].get<float>();
-    m_scales[static_cast<size_t>(EngineDataType::EntityType::AsteroidSmall)] = scales["AsteroidSmall"].get<float>();
-    m_scales[static_cast<size_t>(EngineDataType::EntityType::AsteroidMedium)] = scales["AsteroidMedium"].get<float>();
-    m_scales[static_cast<size_t>(EngineDataType::EntityType::AsteroidBig)] = scales["AsteroidBig"].get<float>();
-    m_scales[static_cast<size_t>(EngineDataType::EntityType::LaserBeam)] = scales["LaserBeam"].get<float>();
-    m_scales[static_cast<size_t>(EngineDataType::EntityType::Player)] = scales["Player"].get<float>();
+    m_scales[static_cast<size_t>(engineDataType::EntityType::AsteroidFragment)] = scales["AsteroidFragment"].get<float>();
+    m_scales[static_cast<size_t>(engineDataType::EntityType::AsteroidSmall)] = scales["AsteroidSmall"].get<float>();
+    m_scales[static_cast<size_t>(engineDataType::EntityType::AsteroidMedium)] = scales["AsteroidMedium"].get<float>();
+    m_scales[static_cast<size_t>(engineDataType::EntityType::AsteroidBig)] = scales["AsteroidBig"].get<float>();
+    m_scales[static_cast<size_t>(engineDataType::EntityType::LaserBeam)] = scales["LaserBeam"].get<float>();
+    m_scales[static_cast<size_t>(engineDataType::EntityType::Player)] = scales["Player"].get<float>();
 
     auto radius = config["radius"];
-    m_radiuses[static_cast<size_t>(EngineDataType::EntityType::AsteroidFragment)] = radius["AsteroidFragment"].get<float>();
-    m_radiuses[static_cast<size_t>(EngineDataType::EntityType::AsteroidMedium)] = radius["AsteroidMedium"].get<float>();
-    m_radiuses[static_cast<size_t>(EngineDataType::EntityType::AsteroidSmall)] = radius["AsteroidSmall"].get<float>();
-    m_radiuses[static_cast<size_t>(EngineDataType::EntityType::AsteroidBig)] = radius["AsteroidBig"].get<float>();
-    m_radiuses[static_cast<size_t>(EngineDataType::EntityType::LaserBeam)] = radius["LaserBeam"].get<float>();
-    m_radiuses[static_cast<size_t>(EngineDataType::EntityType::Player)] = scales["Player"].get<float>();
+    m_radiuses[static_cast<size_t>(engineDataType::EntityType::AsteroidFragment)] = radius["AsteroidFragment"].get<float>();
+    m_radiuses[static_cast<size_t>(engineDataType::EntityType::AsteroidMedium)] = radius["AsteroidMedium"].get<float>();
+    m_radiuses[static_cast<size_t>(engineDataType::EntityType::AsteroidSmall)] = radius["AsteroidSmall"].get<float>();
+    m_radiuses[static_cast<size_t>(engineDataType::EntityType::AsteroidBig)] = radius["AsteroidBig"].get<float>();
+    m_radiuses[static_cast<size_t>(engineDataType::EntityType::LaserBeam)] = radius["LaserBeam"].get<float>();
+    m_radiuses[static_cast<size_t>(engineDataType::EntityType::Player)] = scales["Player"].get<float>();
 
 
     auto points = config["points"];
-    m_pointsPerAsteroid[static_cast<size_t>(EngineDataType::EntityType::AsteroidFragment)] = points["AsteroidFragment"].get<int32_t>();
-    m_pointsPerAsteroid[static_cast<size_t>(EngineDataType::EntityType::AsteroidMedium)] = points["AsteroidMedium"].get<int32_t>();
-    m_pointsPerAsteroid[static_cast<size_t>(EngineDataType::EntityType::AsteroidSmall)] = points["AsteroidSmall"].get<int32_t>();
-    m_pointsPerAsteroid[static_cast<size_t>(EngineDataType::EntityType::AsteroidBig)] = points["AsteroidBig"].get<int32_t>();
+    m_pointsPerAsteroid[static_cast<size_t>(engineDataType::EntityType::AsteroidFragment)] = points["AsteroidFragment"].get<int32_t>();
+    m_pointsPerAsteroid[static_cast<size_t>(engineDataType::EntityType::AsteroidMedium)] = points["AsteroidMedium"].get<int32_t>();
+    m_pointsPerAsteroid[static_cast<size_t>(engineDataType::EntityType::AsteroidSmall)] = points["AsteroidSmall"].get<int32_t>();
+    m_pointsPerAsteroid[static_cast<size_t>(engineDataType::EntityType::AsteroidBig)] = points["AsteroidBig"].get<int32_t>();
   } else {
       std::cerr << "cant load config";
   }
@@ -122,10 +122,10 @@ void Game::saveSettings()
 
 }
 
-bool Game::isAsteroid(EngineDataType::EntityType a_type)
+bool Game::isAsteroid(engineDataType::EntityType a_type)
 {
-  return a_type == EngineDataType::EntityType::AsteroidBig || a_type == EngineDataType::EntityType::AsteroidFragment ||
-    a_type == EngineDataType::EntityType::AsteroidMedium || a_type == EngineDataType::EntityType::AsteroidSmall;
+  return a_type == engineDataType::EntityType::AsteroidBig || a_type == engineDataType::EntityType::AsteroidFragment ||
+    a_type == engineDataType::EntityType::AsteroidMedium || a_type == engineDataType::EntityType::AsteroidSmall;
 }
 
 
@@ -172,7 +172,7 @@ void Game::gameLoop()
       }
 
       updateInput(delta);
-      quit = m_engine.getKeyStatus(EngineDataType::Key::Quit);
+      quit = m_engine.getKeyStatus(engineDataType::Key::Quit);
 
       if (m_shoot) {
         if (lasersSpawnTime >= laserTimeDiff)
@@ -212,16 +212,16 @@ void Game::gameLoop()
   saveSettings();
 }
 
-std::string_view Game::getEngineDataType(EngineDataType::EntityType a_type)
+std::string_view Game::getengineDataType(engineDataType::EntityType a_type)
 {
   switch (a_type)
   {
-    case EngineDataType::EntityType::AsteroidFragment: return "AsteroidFragment";
-    case EngineDataType::EntityType::AsteroidSmall: return "AsteroidSmall";
-    case EngineDataType::EntityType::AsteroidMedium: return "AsteroidMedium";
-    case EngineDataType::EntityType::AsteroidBig: return "AsteroidBig";
-    case EngineDataType::EntityType::Player: return "Player";
-    case EngineDataType::EntityType::LaserBeam: return "LaserBeam";
+    case engineDataType::EntityType::AsteroidFragment: return "AsteroidFragment";
+    case engineDataType::EntityType::AsteroidSmall: return "AsteroidSmall";
+    case engineDataType::EntityType::AsteroidMedium: return "AsteroidMedium";
+    case engineDataType::EntityType::AsteroidBig: return "AsteroidBig";
+    case engineDataType::EntityType::Player: return "Player";
+    case engineDataType::EntityType::LaserBeam: return "LaserBeam";
   }
 
   return "<unknown>";
@@ -229,13 +229,13 @@ std::string_view Game::getEngineDataType(EngineDataType::EntityType a_type)
 
 void Game::updateInput(float a_delta)
 { 
-  if (m_engine.getKeyStatus(EngineDataType::Key::Left))
+  if (m_engine.getKeyStatus(engineDataType::Key::Left))
     m_engine.moveEntityLeft(m_player, a_delta);
   
-  if (m_engine.getKeyStatus(EngineDataType::Key::Right))
+  if (m_engine.getKeyStatus(engineDataType::Key::Right))
     m_engine.moveEntityRight(m_player, a_delta);
   
-  m_shoot = m_engine.getKeyStatus(EngineDataType::Key::Space);
+  m_shoot = m_engine.getKeyStatus(engineDataType::Key::Space);
 }
 
 
@@ -258,7 +258,7 @@ void Game::drawEndGame()
 
 void Game::shoot()
 {
-  auto entity = m_engine.spawnEntity(EngineDataType::EntityType::LaserBeam);
+  auto entity = m_engine.spawnEntity(engineDataType::EntityType::LaserBeam);
 
   auto &playerPhysics = m_engine.getPhysics(m_player);
 
@@ -280,12 +280,12 @@ void Game::checkCollision()
     auto entity2 = it.second;
     auto type2 = m_engine.getPhysics(entity2).entityType;
 
-    if ((type1 == EngineDataType::EntityType::Player && type2 == EngineDataType::EntityType::LaserBeam) ||
-      (type1 == EngineDataType::EntityType::LaserBeam && type2 == EngineDataType::EntityType::Player))  
+    if ((type1 == engineDataType::EntityType::Player && type2 == engineDataType::EntityType::LaserBeam) ||
+      (type1 == engineDataType::EntityType::LaserBeam && type2 == engineDataType::EntityType::Player))  
       continue;
 
-    if ((isAsteroid(type1) && type2 == EngineDataType::EntityType::LaserBeam) ||
-      (type1 == EngineDataType::EntityType::LaserBeam && isAsteroid(type2))) {
+    if ((isAsteroid(type1) && type2 == engineDataType::EntityType::LaserBeam) ||
+      (type1 == engineDataType::EntityType::LaserBeam && isAsteroid(type2))) {
       auto asteroid = isAsteroid(type1) ? type1 : type2;
       m_engine.destroyEntity(entity1);
       m_engine.destroyEntity(entity2);
@@ -335,7 +335,7 @@ void Game::debugDrawEntitiesTree()
   //  auto entity = view[i];
   //  auto &physics = view.get<Physics>(entity);
   //
-  //  if (ImGui::TreeNode((void*)(intptr_t)i, "Entity #%02d (%s)", i, getEngineDataType::EntityTypeName(physics.EngineDataType::EntityType).data()))
+  //  if (ImGui::TreeNode((void*)(intptr_t)i, "Entity #%02d (%s)", i, getengineDataType::EntityTypeName(physics.engineDataType::EntityType).data()))
   //  {
   //    ImGui::InputFloat3("position", glm::value_ptr(physics.position));
   //    ImGui::InputFloat3("velocity", glm::value_ptr(physics.velocity));
@@ -374,21 +374,21 @@ void Game::debugDrawParams()
 
   ImGui::Separator();
 
-  ImGui::InputFloat("scale.AsteroidFragment", &m_scales[static_cast<size_t>(EngineDataType::EntityType::AsteroidFragment)]);
-  ImGui::InputFloat("scale.AsteroidSmall", &m_scales[static_cast<size_t>(EngineDataType::EntityType::AsteroidSmall)]);
-  ImGui::InputFloat("scale.AsteroidMedium", &m_scales[static_cast<size_t>(EngineDataType::EntityType::AsteroidMedium)]);
-  ImGui::InputFloat("scale.AsteroidBig", &m_scales[static_cast<size_t>(EngineDataType::EntityType::AsteroidBig)]);
-  ImGui::InputFloat("scale.LaserBeam", &m_scales[static_cast<size_t>(EngineDataType::EntityType::LaserBeam)]);
-  ImGui::InputFloat("scale.Player", &m_scales[static_cast<size_t>(EngineDataType::EntityType::Player)]);
+  ImGui::InputFloat("scale.AsteroidFragment", &m_scales[static_cast<size_t>(engineDataType::EntityType::AsteroidFragment)]);
+  ImGui::InputFloat("scale.AsteroidSmall", &m_scales[static_cast<size_t>(engineDataType::EntityType::AsteroidSmall)]);
+  ImGui::InputFloat("scale.AsteroidMedium", &m_scales[static_cast<size_t>(engineDataType::EntityType::AsteroidMedium)]);
+  ImGui::InputFloat("scale.AsteroidBig", &m_scales[static_cast<size_t>(engineDataType::EntityType::AsteroidBig)]);
+  ImGui::InputFloat("scale.LaserBeam", &m_scales[static_cast<size_t>(engineDataType::EntityType::LaserBeam)]);
+  ImGui::InputFloat("scale.Player", &m_scales[static_cast<size_t>(engineDataType::EntityType::Player)]);
 
   ImGui::Separator();
 
-  ImGui::InputFloat("radius.AsteroidFragment", &m_radiuses[static_cast<size_t>(EngineDataType::EntityType::AsteroidFragment)]);
-  ImGui::InputFloat("radius.AsteroidSmall", &m_radiuses[static_cast<size_t>(EngineDataType::EntityType::AsteroidSmall)]);
-  ImGui::InputFloat("radius.AsteroidMedium", &m_radiuses[static_cast<size_t>(EngineDataType::EntityType::AsteroidMedium)]);
-  ImGui::InputFloat("radius.AsteroidBig", &m_radiuses[static_cast<size_t>(EngineDataType::EntityType::AsteroidBig)]);
-  ImGui::InputFloat("radius.LaserBeam", &m_radiuses[static_cast<size_t>(EngineDataType::EntityType::LaserBeam)]);
-  ImGui::InputFloat("radius.Player", &m_radiuses[static_cast<size_t>(EngineDataType::EntityType::Player)]);
+  ImGui::InputFloat("radius.AsteroidFragment", &m_radiuses[static_cast<size_t>(engineDataType::EntityType::AsteroidFragment)]);
+  ImGui::InputFloat("radius.AsteroidSmall", &m_radiuses[static_cast<size_t>(engineDataType::EntityType::AsteroidSmall)]);
+  ImGui::InputFloat("radius.AsteroidMedium", &m_radiuses[static_cast<size_t>(engineDataType::EntityType::AsteroidMedium)]);
+  ImGui::InputFloat("radius.AsteroidBig", &m_radiuses[static_cast<size_t>(engineDataType::EntityType::AsteroidBig)]);
+  ImGui::InputFloat("radius.LaserBeam", &m_radiuses[static_cast<size_t>(engineDataType::EntityType::LaserBeam)]);
+  ImGui::InputFloat("radius.Player", &m_radiuses[static_cast<size_t>(engineDataType::EntityType::Player)]);
   
   ImGui::PopItemWidth();
 

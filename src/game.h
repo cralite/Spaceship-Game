@@ -24,11 +24,11 @@ public:
   void saveSettings();
 
   void checkCollision();
-  bool isAsteroid(EngineDataType::EntityType a_type);
+  bool isAsteroid(engineDataType::EntityType a_type);
 
   void gameLoop();
 
-  std::string_view getEngineDataType(EngineDataType::EntityType a_type);
+  std::string_view getengineDataType(engineDataType::EntityType a_type);
 
   void updateInput(float a_delta);
   
@@ -46,12 +46,12 @@ public:
 
 private:
   Engine m_engine{};
-  std::array<int32_t, static_cast<size_t>(EngineDataType::EntityType::Count)> m_pointsPerAsteroid{};
+  std::array<int32_t, static_cast<size_t>(engineDataType::EntityType::Count)> m_pointsPerAsteroid{};
 
   entt::entity m_player{};
 
-  std::array<float, static_cast<size_t>(EngineDataType::EntityType::Count)> m_scales{};
-  std::array<float, static_cast<size_t>(EngineDataType::EntityType::Count)> m_radiuses{};
+  std::array<float, static_cast<size_t>(engineDataType::EntityType::Count)> m_scales{};
+  std::array<float, static_cast<size_t>(engineDataType::EntityType::Count)> m_radiuses{};
 
   Settings m_settings{};
   uint32_t m_points{};
