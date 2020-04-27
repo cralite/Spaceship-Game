@@ -20,7 +20,7 @@ const int TEXTURE_LOCATION = 1;
 const int COLOR_LOCATION = 2;
 
 
-std::optional<std::string> Utils::open_file(std::string_view a_path)
+std::optional<std::string> utils::open_file(std::string_view a_path)
 {
   std::fstream fs{};
   std::string output{};
@@ -32,14 +32,15 @@ std::optional<std::string> Utils::open_file(std::string_view a_path)
       output += str + "\n";
     }
     fs.close();
-  } else {
+  }
+  else {
     std::cerr << "cannot open file" << std::endl;
     return {};
   }
   return output;
 }
 
-Texture Utils::load_texture(std::string_view a_path)
+engineDataType::Texture utils::load_texture(std::string_view a_path)
 {
   stbi_set_flip_vertically_on_load(true);
 
@@ -50,7 +51,7 @@ Texture Utils::load_texture(std::string_view a_path)
     return {};
   }
 
-  Texture texture{};
+  engineDataType::Texture texture{};
   glGenTextures(1, &texture.texture);
   glBindTexture(GL_TEXTURE_2D, texture.texture);
 
@@ -68,19 +69,19 @@ Texture Utils::load_texture(std::string_view a_path)
   return texture;
 }
 
-void Utils::load_shader(std::string_view a_path, ShaderType a_type, Shader& a_shader)
+void utils::load_shader(std::string_view a_path, engineDataType::ShaderType a_type, engineDataType::Shader& a_shader)
 {
   uint32_t newShader{};
   switch (a_type) {
-    case ShaderType::Vertex:
-      newShader = glCreateShader(GL_VERTEX_SHADER);
-      break;
-    case ShaderType::Fragment:
-      newShader = glCreateShader(GL_FRAGMENT_SHADER);
-      break;
+  case engineDataType::ShaderType::Vertex:
+    newShader = glCreateShader(GL_VERTEX_SHADER);
+    break;
+  case engineDataType::ShaderType::Fragment:
+    newShader = glCreateShader(GL_FRAGMENT_SHADER);
+    break;
   }
 
-  if (auto shaderSource = open_file(a_path)) {
+  if (auto shaderSource = utils::open_file(a_path)) {
     int status{};
     char log[512]{};
 
@@ -105,11 +106,11 @@ void Utils::load_shader(std::string_view a_path, ShaderType a_type, Shader& a_sh
   glDeleteShader(newShader);
 }
 
-Model Utils::load_model(const std::vector<float>& a_data)
+engineDataType::Model utils::load_model(const std::vector<float>& a_data)
 {
   uint32_t vbo{};
 
-  Model model{};
+  engineDataType::Model model{};
   glGenVertexArrays(1, &model.vao);
   glGenBuffers(1, &vbo);
 
@@ -132,7 +133,7 @@ Model Utils::load_model(const std::vector<float>& a_data)
   return model;
 }
 
-Model Utils::load_model(std::string_view a_path)
+engineDataType::Model utils::load_model(std::string_view a_path)
 {
   tinyobj::attrib_t attribs{};
   std::vector<tinyobj::shape_t> shapes{};

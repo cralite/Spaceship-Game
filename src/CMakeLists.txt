@@ -1,4 +1,4 @@
-add_executable(SpaceshipGame
+set(IMGUI_FILES
 	imgui/imgui.cpp
 	imgui/imgui.h
 	imgui/imgui_draw.cpp
@@ -11,16 +11,41 @@ add_executable(SpaceshipGame
 	imgui/imstb_rectpack.h
 	imgui/imstb_textedit.h
 	imgui/imstb_truetype.h
+)
+
+set(ENGINE_SRC
+	engine/data_types.h
+	engine/engine.h
+	engine/engine.cc
+	engine/utils.h
+	engine/utils.cc
+)
+
+set(OBJ_LOADER
+	tinyobjloader/tiny_obj_loader.cc
+	tinyobjloader/tiny_obj_loader.h
+)
+
+set(ENGINE
+	${IMGUI_FILES}
+	${ENGINE_SRC}
+	${OBJ_LOADER}
+)
+
+set(GAME_SRC
 	main.cc
 	game.h
 	game.cc
 	data_types.h
-	utils.h
-	utils.cc
+)
+
+add_executable(SpaceshipGame
+	${GAME_SRC}
+	${ENGINE}
 )
 
 target_include_directories(SpaceshipGame
-	PRIVATE ${Stb_INCLUDE_DIR} imgui
+	PRIVATE ${Stb_INCLUDE_DIR} imgui tinyobjloader
 )
 
 target_compile_definitions(SpaceshipGame
@@ -36,5 +61,4 @@ target_link_libraries(SpaceshipGame
 	assimp::assimp
 	nlohmann_json::nlohmann_json
 	glad::glad
-	tinyobjloader::tinyobjloader
 )
