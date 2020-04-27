@@ -49,8 +49,8 @@ private:
 
   entt::entity m_player{};
 
-  std::array<float, static_cast<size_t>(engineDataType::EntityType::Count)> m_scales{};
-  std::array<float, static_cast<size_t>(engineDataType::EntityType::Count)> m_radiuses{};
+  SettingsArray m_scales{};
+  SettingsArray m_radiuses{};
 
   Settings m_settings{};
   uint32_t m_points{};

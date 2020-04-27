@@ -183,9 +183,7 @@ bool Engine::hasCollision(engineDataType::Physics const& entity1, engineDataType
 
   auto length = glm::length(entity1.position - entity2.position);
   int l = static_cast<int>(length);
-  //TODO settings
-  //return length <= (m_radiuses[type1] + m_radiuses[type2]);
-  return false;
+  return length <= (m_radiuses[type1] + m_radiuses[type2]);
 }
 
 void Engine::checkCollision()
@@ -208,7 +206,6 @@ void Engine::checkCollision()
         continue;
   
       bool const collision = hasCollision(physics1, physics2);
-      //TODO settings - radiuses
   
       if (!collision)
         continue;
@@ -369,6 +366,16 @@ engineDataType::Collided& Engine::getCollided()
   return m_collided;
 }
 
+void Engine::setScales(const SettingsArray& a_array)
+{
+  m_scales = a_array;
+}
+
+void Engine::setRadiuses(const SettingsArray& a_array)
+{
+  m_radiuses = a_array;
+}
+
 void Engine::updatePlayer(entt::entity& a_entity, float a_delta)
 {
   auto& model = m_registry.get<engineDataType::Model>(a_entity);
@@ -383,7 +390,7 @@ void Engine::updatePlayer(entt::entity& a_entity, float a_delta)
 
   physics.debugBoxMatrix = glm::mat4(1.0f);
   physics.debugBoxMatrix = glm::translate(physics.debugBoxMatrix, physics.position);
-  //physics.debugBoxMatrix = glm::scale(physics.debugBoxMatrix, glm::vec3(m_radiuses[static_cast<size_t>(physics.entityType)]));
+  physics.debugBoxMatrix = glm::scale(physics.debugBoxMatrix, glm::vec3(m_radiuses[static_cast<size_t>(physics.entityType)]));
 }
 
 void Engine::updateEntities(float a_delta)
@@ -406,10 +413,10 @@ void Engine::updateEntities(float a_delta)
     physics.modelMatrix = glm::mat4(1.0f);
     physics.modelMatrix = glm::translate(physics.modelMatrix, physics.position);
     physics.modelMatrix = glm::rotate(physics.modelMatrix, glm::radians(physics.rotationAngle), physics.rotationAxis);
-    //physics.modelMatrix = glm::scale(physics.modelMatrix, glm::vec3(m_scales[static_cast<size_t>(physics.entityType)]));
+    physics.modelMatrix = glm::scale(physics.modelMatrix, glm::vec3(m_scales[static_cast<size_t>(physics.entityType)]));
 
     physics.debugBoxMatrix = glm::mat4(1.0f);
     physics.debugBoxMatrix = glm::translate(physics.debugBoxMatrix, physics.position);
-    //physics.debugBoxMatrix = glm::scale(physics.debugBoxMatrix, glm::vec3(m_radiuses[static_cast<size_t>(physics.entityType)]));
+    physics.debugBoxMatrix = glm::scale(physics.debugBoxMatrix, glm::vec3(m_radiuses[static_cast<size_t>(physics.entityType)]));
   }
 }

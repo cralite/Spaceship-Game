@@ -112,6 +112,9 @@ void Game::loadSettings()
     m_pointsPerAsteroid[static_cast<size_t>(engineDataType::EntityType::AsteroidMedium)] = points["AsteroidMedium"].get<int32_t>();
     m_pointsPerAsteroid[static_cast<size_t>(engineDataType::EntityType::AsteroidSmall)] = points["AsteroidSmall"].get<int32_t>();
     m_pointsPerAsteroid[static_cast<size_t>(engineDataType::EntityType::AsteroidBig)] = points["AsteroidBig"].get<int32_t>();
+
+    m_engine.setScales(m_scales);
+    m_engine.setRadiuses(m_radiuses);
   } else {
       std::cerr << "cant load config";
   }

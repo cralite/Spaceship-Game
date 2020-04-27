@@ -9,6 +9,7 @@
 
 #include <map>
 
+using SettingsArray = std::array<float, static_cast<size_t>(engineDataType::EntityType::Count)>;
 
 class Engine {
  public:
@@ -39,6 +40,10 @@ class Engine {
    bool getKeyStatus(engineDataType::Key a_key);
    engineDataType::Collided& getCollided();
 
+   void setScales(const SettingsArray& a_array);
+   void setRadiuses(const SettingsArray& a_array);
+
+
  private:
    void setupCamera();
    void updatePlayer(entt::entity& a_entity, float a_delta);
@@ -52,6 +57,7 @@ class Engine {
    SDL_Window* m_window{};
    SDL_GLContext m_context{};
 
+
    engineDataType::Shader m_shader{};
    engineDataType::Camera m_camera{};
 
@@ -62,6 +68,8 @@ class Engine {
    engineDataType::Keys m_keys{};
    std::map<engineDataType::EntityType, engineDataType::Model> m_models{};
    std::map<engineDataType::EntityType, engineDataType::Texture> m_textures{};
+   SettingsArray m_scales{};
+   SettingsArray m_radiuses{};
 
    engineDataType::Collided m_collided{};
 };
