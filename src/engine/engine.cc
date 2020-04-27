@@ -142,7 +142,11 @@ Engine::Engine()
 
 void Engine::loadTextures()
 {
-  m_textures[engineDataType::EntityType::AsteroidBig] = utils::load_texture("data/textures/asteroid.png");
+  engineDataType::Texture asteroid = utils::load_texture("data/textures/asteroid.png");
+  m_textures[engineDataType::EntityType::AsteroidBig] = asteroid;
+  m_textures[engineDataType::EntityType::AsteroidFragment] = asteroid;
+  m_textures[engineDataType::EntityType::AsteroidSmall] = asteroid;
+  m_textures[engineDataType::EntityType::AsteroidMedium] = asteroid;
   m_textures[engineDataType::EntityType::Player] = utils::load_texture("data/textures/player.png");
   m_textures[engineDataType::EntityType::LaserBeam] = utils::load_texture("data/textures/laser_beam.png");
 }
