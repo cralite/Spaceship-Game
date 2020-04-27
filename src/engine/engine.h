@@ -37,6 +37,9 @@ class Engine {
    void moveEntityLeft(entt::entity& a_entity, float a_delta);
    void moveEntityRight(entt::entity& a_entity, float a_delta);
 
+   SDL_Window* window();
+   SDL_GLContext& context();
+
    engineDataType::Physics& getPhysics(entt::entity& a_entity);
    bool getKeyStatus(engineDataType::Key a_key);
    engineDataType::Collided& getCollided();

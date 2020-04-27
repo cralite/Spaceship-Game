@@ -359,6 +359,16 @@ void Engine::moveEntityRight(entt::entity& a_entity, float a_delta)
   physics.position += m_lookDirection * m_camera.speed * a_delta;
 }
 
+SDL_Window* Engine::window()
+{
+  return m_window;
+}
+
+SDL_GLContext& Engine::context()
+{
+  return m_context;
+}
+
 engineDataType::Physics& Engine::getPhysics(entt::entity& a_entity)
 {
   return m_registry.get<engineDataType::Physics>(a_entity);

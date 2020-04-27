@@ -20,13 +20,13 @@ std::uniform_real_distribution<float> g_asteroidAngleVelocity(10.05f, 30.5f);
 
 Game::Game()
 {
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGui::StyleColorsDark();
 
-  //IMGUI_CHECKVERSION();
-  //ImGui::CreateContext();
-  //ImGui::StyleColorsDark();
-
-  //ImGui_ImplSDL2_InitForOpenGL(m_window, m_context);
-  //ImGui_ImplOpenGL3_Init("#version 150");
+  ImGui_ImplSDL2_InitForOpenGL(m_engine.window(), m_engine.context());
+  ImGui_ImplOpenGL3_Init("#version 150");
+  
 
   m_engine.loadTextures();
   m_engine.loadModels();
@@ -43,7 +43,7 @@ void Game::setupPlayer()
 
 void Game::spawnAsteroids()
 {
-  //for (size_t i = 0; i < m_asteroidsAppearanceFrequency; ++i)
+  for (size_t i = 0; i < m_asteroidsAppearanceFrequency; ++i)
     spawnAsteroid();
 }
 
@@ -155,10 +155,9 @@ void Game::gameLoop()
   while (!quit) {
     m_engine.handleKeybordEvent();
 
-    //TODO Fix imgui
-    //ImGui_ImplOpenGL3_NewFrame();
-    //ImGui_ImplSDL2_NewFrame(m_window);
-    //ImGui::NewFrame();
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL2_NewFrame(m_engine.window());
+    ImGui::NewFrame();
     m_engine.clearColor(clearColor);
 
     const auto now = clock_t::now();
@@ -199,16 +198,15 @@ void Game::gameLoop()
 
     m_engine.drawEntities();
 
-    //TODO imgui
-    //drawPoints();
+    drawPoints();
 
-    //debugDrawSystem();
-    //debugDrawEntitiesTree();
-    //debugDrawParams();
+    debugDrawSystem();
+    debugDrawEntitiesTree();
+    debugDrawParams();
 
-    //ImGui::Render();
+    ImGui::Render();
 
-    //ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     m_engine.swapWindow();
   }
 
@@ -294,6 +292,10 @@ void Game::checkCollision()
       m_engine.destroyEntity(entity2);
       m_points += m_pointsPerAsteroid[static_cast<size_t>(asteroid)];
     }
+
+    if ((isAsteroid(type1) && type2 == engineDataType::EntityType::Player) ||
+      (type1 == engineDataType::EntityType::Player && isAsteroid(type2)))
+      m_gameState = GameState::EndGame;
   }
 }
 
