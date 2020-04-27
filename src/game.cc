@@ -303,7 +303,7 @@ void Game::reset()
   m_asteroidsAppearanceFrequency = m_settings.asteroidsAppearanceFrequency;
   m_points = 0;
 
- // m_registry.clear();
+  m_engine.clearRegistry();
 
   setupPlayer();
   spawnAsteroids();

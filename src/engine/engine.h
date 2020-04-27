@@ -31,6 +31,7 @@ class Engine {
    void updateAllEntities(entt::entity& a_entity, float a_delta);
    void clearColor(float color[3]);
    void swapWindow();
+   void clearRegistry();
 
    //TODO rethink this - maybe separate struct/class for this type of functions?
    void moveEntityLeft(entt::entity& a_entity, float a_delta);

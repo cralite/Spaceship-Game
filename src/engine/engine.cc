@@ -342,6 +342,11 @@ void Engine::swapWindow()
   SDL_GL_SwapWindow(m_window);
 }
 
+void Engine::clearRegistry()
+{
+  m_registry.clear();
+}
+
 void Engine::moveEntityLeft(entt::entity& a_entity, float a_delta)
 {
   auto& physics = m_registry.get<engineDataType::Physics>(a_entity);
@@ -386,7 +391,6 @@ void Engine::updatePlayer(entt::entity& a_entity, float a_delta)
   auto& texture = m_registry.get<engineDataType::Texture>(a_entity);
   auto& physics = m_registry.get<engineDataType::Physics>(a_entity);
 
-  //TODO deliver settings to engine
   physics.position += 1.1f * m_camera.direction * a_delta;
 
   physics.modelMatrix = glm::mat4(1.0f);
