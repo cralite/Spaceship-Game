@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace Utils {
+namespace utils {
 
   std::optional<std::string> open_file(std::string_view a_path);
 

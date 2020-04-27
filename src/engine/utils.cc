@@ -20,7 +20,7 @@ const int TEXTURE_LOCATION = 1;
 const int COLOR_LOCATION = 2;
 
 
-std::optional<std::string> Utils::open_file(std::string_view a_path)
+std::optional<std::string> utils::open_file(std::string_view a_path)
 {
   std::fstream fs{};
   std::string output{};
@@ -40,7 +40,7 @@ std::optional<std::string> Utils::open_file(std::string_view a_path)
   return output;
 }
 
-engineDataType::Texture Utils::load_texture(std::string_view a_path)
+engineDataType::Texture utils::load_texture(std::string_view a_path)
 {
   stbi_set_flip_vertically_on_load(true);
 
@@ -69,7 +69,7 @@ engineDataType::Texture Utils::load_texture(std::string_view a_path)
   return texture;
 }
 
-void Utils::load_shader(std::string_view a_path, engineDataType::ShaderType a_type, engineDataType::Shader& a_shader)
+void utils::load_shader(std::string_view a_path, engineDataType::ShaderType a_type, engineDataType::Shader& a_shader)
 {
   uint32_t newShader{};
   switch (a_type) {
@@ -81,7 +81,7 @@ void Utils::load_shader(std::string_view a_path, engineDataType::ShaderType a_ty
     break;
   }
 
-  if (auto shaderSource = Utils::open_file(a_path)) {
+  if (auto shaderSource = utils::open_file(a_path)) {
     int status{};
     char log[512]{};
 
@@ -106,7 +106,7 @@ void Utils::load_shader(std::string_view a_path, engineDataType::ShaderType a_ty
   glDeleteShader(newShader);
 }
 
-engineDataType::Model Utils::load_model(const std::vector<float>& a_data)
+engineDataType::Model utils::load_model(const std::vector<float>& a_data)
 {
   uint32_t vbo{};
 
@@ -133,7 +133,7 @@ engineDataType::Model Utils::load_model(const std::vector<float>& a_data)
   return model;
 }
 
-engineDataType::Model Utils::load_model(std::string_view a_path)
+engineDataType::Model utils::load_model(std::string_view a_path)
 {
   tinyobj::attrib_t attribs{};
   std::vector<tinyobj::shape_t> shapes{};

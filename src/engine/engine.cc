@@ -130,8 +130,8 @@ Engine::Engine()
   glViewport(0, 0, 1280, 720);
 
   m_shader.program = glCreateProgram();
-  Utils::load_shader("data/shaders/shader.vert", engineDataType::ShaderType::Vertex, m_shader);
-  Utils::load_shader("data/shaders/shader.frag", engineDataType::ShaderType::Fragment, m_shader);
+  utils::load_shader("data/shaders/shader.vert", engineDataType::ShaderType::Vertex, m_shader);
+  utils::load_shader("data/shaders/shader.frag", engineDataType::ShaderType::Fragment, m_shader);
 
   setupCamera();
   glEnable(GL_DEBUG_OUTPUT);
@@ -142,20 +142,20 @@ Engine::Engine()
 
 void Engine::loadTextures()
 {
-  m_textures[engineDataType::EntityType::AsteroidBig] = Utils::load_texture("data/textures/asteroid.png");
-  m_textures[engineDataType::EntityType::Player] = Utils::load_texture("data/textures/player.png");
-  m_textures[engineDataType::EntityType::LaserBeam] = Utils::load_texture("data/textures/laser_beam.png");
+  m_textures[engineDataType::EntityType::AsteroidBig] = utils::load_texture("data/textures/asteroid.png");
+  m_textures[engineDataType::EntityType::Player] = utils::load_texture("data/textures/player.png");
+  m_textures[engineDataType::EntityType::LaserBeam] = utils::load_texture("data/textures/laser_beam.png");
 }
 
 void Engine::loadModels()
 {
-  m_models[engineDataType::EntityType::AsteroidFragment] = Utils::load_model("data/models/asteroid_fragment.obj");
-  m_models[engineDataType::EntityType::AsteroidSmall] = Utils::load_model("data/models/asteroid_small.obj");
-  m_models[engineDataType::EntityType::AsteroidMedium] = Utils::load_model("data/models/asteroid_medium.obj");
-  m_models[engineDataType::EntityType::AsteroidBig] = Utils::load_model("data/models/asteroid_big.obj");
-  m_models[engineDataType::EntityType::LaserBeam] = Utils::load_model("data/models/laser_beam.obj");
-  m_models[engineDataType::EntityType::Player] = Utils::load_model("data/models/player.obj");
-  m_models[engineDataType::EntityType::Box] = Utils::load_model(g_vertices);
+  m_models[engineDataType::EntityType::AsteroidFragment] = utils::load_model("data/models/asteroid_fragment.obj");
+  m_models[engineDataType::EntityType::AsteroidSmall] = utils::load_model("data/models/asteroid_small.obj");
+  m_models[engineDataType::EntityType::AsteroidMedium] = utils::load_model("data/models/asteroid_medium.obj");
+  m_models[engineDataType::EntityType::AsteroidBig] = utils::load_model("data/models/asteroid_big.obj");
+  m_models[engineDataType::EntityType::LaserBeam] = utils::load_model("data/models/laser_beam.obj");
+  m_models[engineDataType::EntityType::Player] = utils::load_model("data/models/player.obj");
+  m_models[engineDataType::EntityType::Box] = utils::load_model(g_vertices);
 }
 
 void Engine::prepareScene()
