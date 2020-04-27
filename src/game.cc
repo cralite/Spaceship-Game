@@ -12,7 +12,7 @@
 #include <cassert>
 #include <random>
 
-#include "utils.h"
+#include "engine/utils.h"
 
 std::random_device g_rd;
 std::mt19937 g_gen{ g_rd() };
@@ -80,7 +80,7 @@ void Game::loadSettings()
 {
   using json = nlohmann::json;
 
-  if (auto configData = GameUtils::open_file("data/configs/config.json")) {
+  if (auto configData = utils::open_file("data/configs/config.json")) {
     json config{ json::parse((*configData).data()) };
     m_settings.cannonShootingFrequency = config["cannonShootingFrequency"].get<float>();
     m_settings.cannonShootingVelocity = config["cannonShootingVelocity"].get<float>();

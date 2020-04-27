@@ -37,8 +37,6 @@ set(GAME_SRC
 	game.h
 	game.cc
 	data_types.h
-	utils.h
-	utils.cc
 )
 
 add_executable(SpaceshipGame

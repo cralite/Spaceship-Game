@@ -6,7 +6,6 @@
 
 #include "engine/engine.h"
 #include <entt/entt.hpp>
-#include "utils.h"
 #include "data_types.h"
 
 class Game {
